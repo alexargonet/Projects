@@ -1,0 +1,5 @@
+System.out.println("" + Math.atan2(1.0,1.0));
+System.out.println("" + Math.atan2(1.0,-1.0));System.out.println("" + ((Math.atan2(-1.0,-1.0))+2*Math.PI));System.out.println("" + ((Math.atan2(-1.0,1.0))+2*Math.PI));
+
+
+System.out.println("" + Math.acos(-0.7071));

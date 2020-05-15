@@ -179,28 +179,28 @@ public class PaintImage extends JFrame implements MouseMotionListener,MouseListe
         //************************************
         // POPUP MENU
         //************************************
-        popupMenu = new JPopupMenu("PopUp"); 
+        popupMenu = new JPopupMenu("PopUpMenu"); 
         //add(popupMenu); 
         popupMenu.addMouseListener(this);
         
-        JMenuItem cutMenuItem = new JMenuItem("Cut");
-        cutMenuItem.setActionCommand("Cut");
+        JMenuItem cutMenuItem = new JMenuItem("Punti di Controllo");
+        cutMenuItem.setActionCommand("Punti");
 
-        JMenuItem copyMenuItem = new JMenuItem("Copy");
-        copyMenuItem.setActionCommand("Copy");
+        JMenuItem copyMenuItem = new JMenuItem("Morphing");
+        copyMenuItem.setActionCommand("Morphing");
 
-        JMenuItem pasteMenuItem = new JMenuItem("Paste");
-        pasteMenuItem.setActionCommand("Paste");
+        /*JMenuItem pasteMenuItem = new JMenuItem("Paste");
+        pasteMenuItem.setActionCommand("Paste");*/
 
         MenuItemListener menuItemListener = new MenuItemListener();
 
         cutMenuItem.addActionListener(menuItemListener);
         copyMenuItem.addActionListener(menuItemListener);
-        pasteMenuItem.addActionListener(menuItemListener);
+        //pasteMenuItem.addActionListener(menuItemListener);
 
         popupMenu.add(cutMenuItem);
         popupMenu.add(copyMenuItem);
-        popupMenu.add(pasteMenuItem);   
+        //popupMenu.add(pasteMenuItem);   
         //********************************************************
         //********************************************************
         // Add a listener to the New menu item. actionPerformed() method will
@@ -3799,7 +3799,7 @@ public class PaintImage extends JFrame implements MouseMotionListener,MouseListe
         g.setFont(compImg.getFont());
         compImg.paintAll(g);
        
-        JPanelControlPoint jpanelCP= new JPanelControlPoint(imagetmp);
+        JPanelControlPoint jpanelCP= new JPanelControlPoint(imagetmp,this);
         
  		for(java.awt.Component layer : layeredPane.getComponents()){
  			layer.setVisible(false);
@@ -4754,6 +4754,13 @@ public void generaReticolo(){
 	      public void actionPerformed(ActionEvent e) {            
 	         //statusLabel.setText(e.getActionCommand() + " MenuItem clicked.");
 	    	  System.out.println(e.getActionCommand() + " MenuItem clicked.");
+	    	  if(e.getActionCommand().equals("Punti")) {
+	    		  if(getVisibileComponent() instanceof JPanelControlPoint) {
+	    			  JPanelControlPoint jpcp = (JPanelControlPoint)getVisibileComponent();
+	    			  popupMenu.getSubElements()[0].menuSelectionChanged(false);
+	    			  jpcp.setbPhase1(false);
+	    		  }
+	    	  }
 	      }    
 	   }   
 	

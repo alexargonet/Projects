@@ -61,6 +61,7 @@ import ricostruzione.MBA;
 import ricostruzione.MBA_new;
 import utility.BinaryTree;
 import utility.ColorArray;
+import utility.FourPointInt;
 import utility.TreeNode;
 import utility.Utility;
 import utility.Vettore;
@@ -183,23 +184,24 @@ public class PaintImage extends JFrame implements MouseMotionListener,MouseListe
         //add(popupMenu); 
         popupMenu.addMouseListener(this);
         
-        JMenuItem cutMenuItem = new JMenuItem("Punti di Controllo");
-        cutMenuItem.setActionCommand("Punti");
+        JMenuItem morph1MenuItem = new JMenuItem("Punti di Controllo");
+        morph1MenuItem.setActionCommand("Punti");
 
-        JMenuItem copyMenuItem = new JMenuItem("Morphing");
-        copyMenuItem.setActionCommand("Morphing");
+        JMenuItem morph2MenuItem = new JMenuItem("Morphing");
+        morph2MenuItem.setActionCommand("Morphing");
 
         /*JMenuItem pasteMenuItem = new JMenuItem("Paste");
         pasteMenuItem.setActionCommand("Paste");*/
 
         MenuItemListener menuItemListener = new MenuItemListener();
 
-        cutMenuItem.addActionListener(menuItemListener);
-        copyMenuItem.addActionListener(menuItemListener);
+        morph1MenuItem.addActionListener(menuItemListener);
+        morph2MenuItem.addActionListener(menuItemListener);
         //pasteMenuItem.addActionListener(menuItemListener);
+        morph2MenuItem.setEnabled(false);
 
-        popupMenu.add(cutMenuItem);
-        popupMenu.add(copyMenuItem);
+        popupMenu.add(morph1MenuItem);
+        popupMenu.add(morph2MenuItem);
         //popupMenu.add(pasteMenuItem);   
         //********************************************************
         //********************************************************
@@ -3573,7 +3575,7 @@ public class PaintImage extends JFrame implements MouseMotionListener,MouseListe
     }
     
 //*********************************************************************
-//	MORPHING MBA
+//	MORPHING MBA ORIGINAL TEST
 //*********************************************************************
     private void MorphMBATest(){
 
@@ -3780,6 +3782,218 @@ public class PaintImage extends JFrame implements MouseMotionListener,MouseListe
     	addImage(imagetmp,"morph_mba_total");
     	
     }
+
+  //*********************************************************************
+//	MORPHING MBA DISPLACEMENT
+//*********************************************************************
+    private void MorphMBADispl(BufferedImage imagetmp, ArrayList<FourPointInt> displPointList){
+
+    	//java.awt.Component compImg=getVisibileComponent();
+    	int Hi=0,Wi=0;
+    	Color img_color=null;
+    	Color img_color_tmp= new Color(0,0,0);
+    	double[][] arrayOutTmpR=null;
+    	double[][] arrayOutTmpG=null;
+    	double[][] arrayOutTmpB=null;
+    	double[][] arrayOutTmpRX=null;
+    	double[][] arrayOutTmpGX=null;
+    	double[][] arrayOutTmpBX=null;
+    	double[][] arrayOutTmpRY=null;
+    	double[][] arrayOutTmpGY=null;
+    	double[][] arrayOutTmpBY=null;
+    	//BufferedImage imagetmp = null;
+    	BufferedImage imagetmp_pre = null;
+    	BufferedImage imagetmpX = null;
+    	BufferedImage imagetmpY = null;
+    	int imageType=1;
+    	
+    	/*Integer[] options = {1,2,4,8,16,32,64,128};
+        Integer n = (Integer)JOptionPane.showInputDialog(this, "Seleziona passo di campionamento:",
+                "Passo di campionamento in pixel", JOptionPane.QUESTION_MESSAGE, null, options, options[2]);
+        if(n==null)
+        	return;*/
+    	int sample=1;
+    	
+    	
+    	//Integer[] optionsL = {1,2,4,8,16};
+    	int lattice=0;
+        String lat = JOptionPane.showInputDialog(this, "Seleziona larghezza reticolo:",
+                "Larghezza reticolo", JOptionPane.QUESTION_MESSAGE);
+        if(lat==null)
+        	return;
+        try{
+        	lattice=Integer.parseInt(lat);
+        }catch(NumberFormatException e){
+        	JOptionPane.showMessageDialog(this, "Il valore inserito non è un numero: " + lat , "InfoBox: PaintImage", JOptionPane.INFORMATION_MESSAGE);
+        	return;
+        }
+        if(lattice<=0){
+        	JOptionPane.showMessageDialog(this, "Il valore inserito è un numero minore di 0: " + lat , "InfoBox: PaintImage", JOptionPane.INFORMATION_MESSAGE);
+        	return;
+        }
+        
+       	
+    	Hi=imagetmp.getHeight();
+    	Wi=imagetmp.getWidth();
+    	
+        int[][] imageOrigR = new int[Wi][Hi];
+        int[][] imageOrigG = new int[Wi][Hi];
+        int[][] imageOrigB = new int[Wi][Hi];
+        
+        int[][] imageOrigRX = new int[Wi][Hi];
+        int[][] imageOrigGX = new int[Wi][Hi];
+        int[][] imageOrigBX = new int[Wi][Hi];
+        
+        int[][] imageOrigRY = new int[Wi][Hi];
+        int[][] imageOrigGY = new int[Wi][Hi];
+        int[][] imageOrigBY = new int[Wi][Hi];
+        
+        
+    	int sgn=1;
+       for(int i=0;(i<(Hi));i++){
+			for(int j=0;j<(Wi);j++){
+				
+				imageOrigR[j][i]=-1;
+				imageOrigG[j][i]=-1;
+				imageOrigB[j][i]=-1;	
+				
+				imageOrigRX[j][i]=-1;
+				imageOrigGX[j][i]=-1;
+				imageOrigBX[j][i]=-1;
+				
+				imageOrigRY[j][i]=-1;
+				imageOrigGY[j][i]=-1;
+				imageOrigBY[j][i]=-1;
+				
+				// spostamento
+				/*if(i==Hi/2 && j%30==0 && j>0 && j<Wi-1){
+					imageOrigRY[j][i]=sgn*20;
+					imageOrigGY[j][i]=sgn*20;
+					imageOrigBY[j][i]=sgn*20;
+					sgn=sgn*1;
+				}*/
+				// bordi a zero non si muovono
+				if(i==0 || i==Hi-1 || j==0 || j==Wi-1){
+					imageOrigRX[j][i]=0;
+					imageOrigGX[j][i]=0;
+					imageOrigBX[j][i]=0;
+					imageOrigRY[j][i]=0;
+					imageOrigGY[j][i]=0;
+					imageOrigBY[j][i]=0;
+				}
+				
+					
+				// determino se l'immagine è a colori
+				if(imageType!=3 && imageOrigRX[j][i]!=imageOrigGX[j][i] || imageOrigRX[j][i]!=imageOrigB[j][i]){
+					imageType=3;
+				}
+    		}
+    	}
+       	for(FourPointInt dispPoint: displPointList) {
+       		imageOrigRX[dispPoint.getX()][dispPoint.getY()]=dispPoint.getDx()-dispPoint.getX();
+			imageOrigGX[dispPoint.getX()][dispPoint.getY()]=dispPoint.getDx()-dispPoint.getX();
+			imageOrigBX[dispPoint.getX()][dispPoint.getY()]=dispPoint.getDx()-dispPoint.getX();
+			
+			imageOrigRY[dispPoint.getX()][dispPoint.getY()]=dispPoint.getDy()-dispPoint.getY();
+			imageOrigGY[dispPoint.getX()][dispPoint.getY()]=dispPoint.getDy()-dispPoint.getY();
+			imageOrigBY[dispPoint.getX()][dispPoint.getY()]=dispPoint.getDy()-dispPoint.getY();
+       	}
+    	//addImage(imagetmp,"sampled_img_orig");
+    	
+    	long initime=0;
+    	long fintime=0;
+    	int fuctValR=0;
+    	int fuctValG=0;
+    	int fuctValB=0;
+    	
+    	double fuctValRDouble=0;
+    	double fuctValGDouble=0;
+    	double fuctValBDouble=0; 	
+    	
+    	
+		MBA_new mba_new = new MBA_new(imageOrigRX,Hi,Wi,lattice);
+    	initime =  Calendar.getInstance().getTimeInMillis();
+    	arrayOutTmpRX=mba_new.calcoloMBA();
+    	mba_new.initialize(imageOrigRY,Hi,Wi,lattice);
+    	arrayOutTmpRY=mba_new.calcoloMBA();
+    	//mba_new.initialize(imageOrigB,Hi,Wi,lattice);
+    	//arrayOutTmpB=mba_new.calcoloMBA();
+    	
+    	imagetmp_pre = new BufferedImage((int)Wi, (int)Hi, BufferedImage.TYPE_INT_RGB);
+    	img_color = new Color(0,0,0);
+    	for(int i=0;(i<(Hi));i++){
+			for(int j=0;j<(Wi);j++){
+				
+				imagetmp_pre.setRGB(j, i, img_color.getRGB());
+					
+			}
+		}
+    	
+    	for(int i=0;(i<(Hi));i++){
+			for(int j=0;j<(Wi);j++){
+				fuctValR=(int)Math.round(arrayOutTmpRX[j][i]);
+				if(fuctValR>255)
+					fuctValR=255;
+				/*if(fuctValR<0)
+					fuctValR=0;*///tolto perchè non venivano valori in detrazione
+				fuctValG=(int)Math.round(arrayOutTmpRY[j][i]);
+				if(fuctValG>255)
+					fuctValG=255;
+				/*if(fuctValG<0)
+					fuctValG=0;*/ //tolto perchè non venivano valori in detrazione
+				/*fuctValB=(int)Math.round(arrayOutTmpB[j][i]);
+				if(fuctValB>255)
+					fuctValB=255;
+				if(fuctValB<0)
+					fuctValB=0;*/
+				imageOrigRX[j][i]=fuctValR;
+				imageOrigGX[j][i]=fuctValR;
+				imageOrigBX[j][i]=fuctValR;
+				
+				imageOrigRY[j][i]=fuctValG;
+				imageOrigGY[j][i]=fuctValG;
+				imageOrigBY[j][i]=fuctValG;
+				
+				if(fuctValG>10 || fuctValR>10){
+					fuctValG = fuctValG;
+				}
+				
+				img_color = new Color(imagetmp.getRGB(j,i));
+				// inserire controllo nuovi indici dentro dimensioni immagine
+				imageOrigR[j+fuctValR][i+fuctValG] = img_color.getRed();
+				imageOrigG[j+fuctValR][i+fuctValG] = img_color.getGreen();
+				imageOrigB[j+fuctValR][i+fuctValG] = img_color.getBlue();	
+				//img_color = new Color(fuctValR,fuctValR,fuctValR);
+				imagetmp_pre.setRGB(j+fuctValR, i+fuctValG, img_color.getRGB());
+				
+    		}
+    	}
+    	addImage(imagetmp_pre,"morph_mba_pre");
+    	
+    	//imagetmp = new BufferedImage((int)Wi, (int)Hi, BufferedImage.TYPE_INT_RGB);
+    	
+    	MBA_new mba_new_morph = new MBA_new(imageOrigR,Hi,Wi,lattice);
+    	
+    	arrayOutTmpR=mba_new_morph.calcoloMBA();
+    	
+    	for(int i=0;(i<(Hi));i++){
+			for(int j=0;j<(Wi);j++){
+				fuctValR=(int)Math.round(arrayOutTmpR[j][i]);
+				if(fuctValR>255)
+					fuctValR=255;
+				if(fuctValR<0)
+					fuctValR=0;
+				img_color = new Color(fuctValR,fuctValR,fuctValR);
+				imagetmp.setRGB(j, i, img_color.getRGB());
+			}
+    	}
+    	
+    	fintime = Calendar.getInstance().getTimeInMillis();
+    	JOptionPane.showMessageDialog(null, "" + (fintime-initime) , "InfoBox: PaintImage", JOptionPane.INFORMATION_MESSAGE);
+    	addImage(imagetmp,"morph_mba_total");
+    	
+    }    
+ 
 //*************************************
 // loadCtrlPanel
 //*************************************
@@ -4757,9 +4971,14 @@ public void generaReticolo(){
 	    	  if(e.getActionCommand().equals("Punti")) {
 	    		  if(getVisibileComponent() instanceof JPanelControlPoint) {
 	    			  JPanelControlPoint jpcp = (JPanelControlPoint)getVisibileComponent();
-	    			  popupMenu.getSubElements()[0].menuSelectionChanged(false);
+	    			  ((JMenuItem)popupMenu.getSubElements()[0]).setEnabled(false);
 	    			  jpcp.setbPhase1(false);
+	    			  ((JMenuItem)popupMenu.getSubElements()[1]).setEnabled(true);
 	    		  }
+	    	  }
+	    	  else if(e.getActionCommand().equals("Morphing")) {
+	    		  JPanelControlPoint jpcp = (JPanelControlPoint)getVisibileComponent();
+	    		  jpcp.getDisplacement();
 	    	  }
 	      }    
 	   }   

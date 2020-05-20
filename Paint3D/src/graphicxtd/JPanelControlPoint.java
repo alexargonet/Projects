@@ -40,11 +40,11 @@ public class JPanelControlPoint extends JPanel {
    private int width;
    private int height;
    private int gridDivisions;
-   private List<List<Ellipse2D>> ellipseList = new ArrayList<List<Ellipse2D>>();
-   private List<List<Ellipse2Dextd>> ellipseXtdList1 = new ArrayList<List<Ellipse2Dextd>>();
-   private List<List<Ellipse2Dextd>> ellipseXtdList2 = new ArrayList<List<Ellipse2Dextd>>();
-   List<Ellipse2Dextd> newEndPointsXtd1=null;
-   List<Ellipse2Dextd> newEndPointsXtd2=null;
+   private ArrayList<ArrayList<Ellipse2D>> ellipseList = new ArrayList<ArrayList<Ellipse2D>>();
+   private ArrayList<ArrayList<Ellipse2Dextd>> ellipseXtdList1 = new ArrayList<ArrayList<Ellipse2Dextd>>();
+   private ArrayList<ArrayList<Ellipse2Dextd>> ellipseXtdList2 = new ArrayList<ArrayList<Ellipse2Dextd>>();
+   ArrayList<Ellipse2Dextd> newEndPointsXtd1=null;
+   ArrayList<Ellipse2Dextd> newEndPointsXtd2=null;
    private Line2D drawingLine = null;
    private Ellipse2D drawingCircle = null;
    
@@ -154,7 +154,7 @@ public JPanelControlPoint(int width, int height, int gridDivisions) {
       }
       // orginale
       g2.setColor(LINE_COLOR_1);
-      for (List<Ellipse2D> ellipses : ellipseList) {
+      for (ArrayList<Ellipse2D> ellipses : ellipseList) {
          Point2D p2d1 = new Point2D.Double(ellipses.get(0).getCenterX(), ellipses.get(0).getCenterY());
          Point2D p2d2 = new Point2D.Double(ellipses.get(1).getCenterX(), ellipses.get(1).getCenterY());
          Line2D line = new Line2D.Double(p2d1, p2d2);
@@ -162,7 +162,7 @@ public JPanelControlPoint(int width, int height, int gridDivisions) {
       }
       
     // poligonale1
-	for (List<Ellipse2Dextd> ellipses : ellipseXtdList1) {
+	for (ArrayList<Ellipse2Dextd> ellipses : ellipseXtdList1) {
 		g2.setStroke(initStroke);
 		if(ellipseDrag!=null && ellipses.contains(ellipseDrag.getEllipsec())){
 			Point2D p2d0=null;
@@ -198,7 +198,7 @@ public JPanelControlPoint(int width, int height, int gridDivisions) {
 	
 	// poligonale2
 	g2.setColor(LINE_COLOR_2);
-		for (List<Ellipse2Dextd> ellipses : ellipseXtdList2) {
+		for (ArrayList<Ellipse2Dextd> ellipses : ellipseXtdList2) {
 			g2.setStroke(initStroke);
 			if(ellipseDrag!=null && ellipses.contains(ellipseDrag.getEllipsec())){
 				Point2D p2d0=null;
@@ -370,7 +370,7 @@ public JPanelControlPoint(int width, int height, int gridDivisions) {
 					  }*/
 					   // controlo se il punto cliccato appartiene a qualche spigolo della poligonale
 					   // nel caso recupera lo spigolo precedente e successivo se presenti
-					   for (List<Ellipse2Dextd> ellipses : ellipseXtdList1) {
+					   for (ArrayList<Ellipse2Dextd> ellipses : ellipseXtdList1) {
 						   for (int i = 0; i < ellipses.size(); i++) {
 							   Ellipse2Dextd endPt = ellipses.get(i);
 							   // cotrolla se il punto del cliccato dal mouse è in qualche poligonale
@@ -422,7 +422,7 @@ public JPanelControlPoint(int width, int height, int gridDivisions) {
 
 					   // controlo se il punto cliccato appartiene a qualche spigolo della poligonale
 					   // nel caso recupera lo spigolo precedente e successivo se presenti
-					   for (List<Ellipse2Dextd> ellipses : ellipseXtdList2) {
+					   for (ArrayList<Ellipse2Dextd> ellipses : ellipseXtdList2) {
 						   for (int i = 0; i < ellipses.size(); i++) {
 							   Ellipse2Dextd endPt = ellipses.get(i);
 							   // cotrolla se il punto del cliccato dal mouse è in qualche poligonale
@@ -792,7 +792,7 @@ public JPanelControlPoint(int width, int height, int gridDivisions) {
 			//**************************************************************
 			// CLONO LA LISTA DEI POLIGONI1 NELLA LISTA DEI POLIGONI2
 			//**************************************************************
-			for (List<Ellipse2Dextd> ellipses : ellipseXtdList1) {
+			for (ArrayList<Ellipse2Dextd> ellipses : ellipseXtdList1) {
 				newEndPointsXtd2 = new ArrayList<Ellipse2Dextd>();
 				ellipseXtdList2.add(newEndPointsXtd2);
 				for (Ellipse2Dextd ellipse1 : ellipses) {
@@ -805,7 +805,7 @@ public JPanelControlPoint(int width, int height, int gridDivisions) {
 		}
 	}
 	
-	public List<FourPointInt> getDisplacement() {
+	public ArrayList<FourPointInt> getDisplacement() {
 		ArrayList<FourPointInt> morphDisplList=null;
 		// se phase 2
 		if(!bPhase1) {
@@ -813,7 +813,7 @@ public JPanelControlPoint(int width, int height, int gridDivisions) {
 			FourPointInt fourPointm=null;
 			 morphDisplList = new ArrayList<FourPointInt>();
 			
-			for (List<Ellipse2Dextd> ellipses : ellipseXtdList1) {
+			for (ArrayList<Ellipse2Dextd> ellipses : ellipseXtdList1) {
 				for (Ellipse2Dextd ellipse1 : ellipses) {
 					fourPointm = new FourPointInt();
 					fourPointm.setX((int)Math.round(ellipse1.getEllipse().getCenterX()));
@@ -822,7 +822,7 @@ public JPanelControlPoint(int width, int height, int gridDivisions) {
 				}		
 			}
 			
-			for (List<Ellipse2Dextd> ellipses : ellipseXtdList2) {
+			for (ArrayList<Ellipse2Dextd> ellipses : ellipseXtdList2) {
 				for (Ellipse2Dextd ellipse2 : ellipses) {
 					morphDisplList.get(i).setDx((int)Math.round(ellipse2.getEllipse().getCenterX()));
 					morphDisplList.get(i).setDy((int)Math.round(ellipse2.getEllipse().getCenterY()));
@@ -832,5 +832,24 @@ public JPanelControlPoint(int width, int height, int gridDivisions) {
 		}
 		return morphDisplList;
 	}
+	
+	public ArrayList<FourPointInt> getControlPoint(){
+		ArrayList<FourPointInt> morphDisplList=null;
+		if(bPhase1) {
+			int i=0;
+			FourPointInt fourPointm=null;
+			morphDisplList = new ArrayList<FourPointInt>();
+			for (ArrayList<Ellipse2Dextd> ellipses : ellipseXtdList1) {
+				for (Ellipse2Dextd ellipse1 : ellipses) {
+					fourPointm = new FourPointInt();
+					fourPointm.setX((int)Math.round(ellipse1.getEllipse().getCenterX()));
+					fourPointm.setY((int)Math.round(ellipse1.getEllipse().getCenterY()));
+					morphDisplList.add(fourPointm);
+				}		
+			}
+		}
+		return morphDisplList;
+	}
+	
 }
 

@@ -58,7 +58,9 @@ import objectBase.ColorResult;
 import objectBase.IdObj;
 import objectBase.ObjectBase;
 import ricostruzione.MBA;
-import ricostruzione.MBA_new;
+import ricostruzione.MBAN1D;
+import ricostruzione.MBAN2D;
+import ricostruzione.Morph;
 import utility.BinaryTree;
 import utility.ColorArray;
 import utility.FourPointInt;
@@ -80,6 +82,7 @@ public class PaintImage extends JFrame implements MouseMotionListener,MouseListe
 	JPopupMenu popupMenu=null;
 	
 	MBADialog frameMBA=null;
+	Morph morph=null;
 	
 	Scena3D scena=null;
 	BufferedImage imageRif=null;
@@ -132,7 +135,8 @@ public class PaintImage extends JFrame implements MouseMotionListener,MouseListe
         JMenuItem radiositaAction = new JMenuItem("Radiosità");
         JMenuItem rad_renderingAction = new JMenuItem("Radiosità + Rendering");
         // ricostruzione
-        JMenuItem MBAAction = new JMenuItem("MBA");
+        JMenuItem MBAAction = new JMenuItem("MBA2D");
+        JMenuItem MBAAction1D = new JMenuItem("MBA1D");
         // morphing
         JMenuItem MorphMBAAction = new JMenuItem("Morphing MBA");
         // utility
@@ -171,6 +175,7 @@ public class PaintImage extends JFrame implements MouseMotionListener,MouseListe
         sceneMenu.add(rad_renderingAction);
         // scena
         filtriMenu.add(MBAAction);
+        filtriMenu.add(MBAAction1D);
         filtriMenu.add(MorphMBAAction);
         // statistiche
         stitisticheMenu.add(imgDiffAction);
@@ -189,6 +194,9 @@ public class PaintImage extends JFrame implements MouseMotionListener,MouseListe
 
         JMenuItem morph2MenuItem = new JMenuItem("Morphing");
         morph2MenuItem.setActionCommand("Morphing");
+        
+        JMenuItem spline3MenuItem = new JMenuItem("MBASpline");
+        spline3MenuItem.setActionCommand("MBASpline");
 
         /*JMenuItem pasteMenuItem = new JMenuItem("Paste");
         pasteMenuItem.setActionCommand("Paste");*/
@@ -197,11 +205,13 @@ public class PaintImage extends JFrame implements MouseMotionListener,MouseListe
 
         morph1MenuItem.addActionListener(menuItemListener);
         morph2MenuItem.addActionListener(menuItemListener);
+        spline3MenuItem.addActionListener(menuItemListener);
         //pasteMenuItem.addActionListener(menuItemListener);
         morph2MenuItem.setEnabled(false);
 
         popupMenu.add(morph1MenuItem);
         popupMenu.add(morph2MenuItem);
+        popupMenu.add(spline3MenuItem);
         //popupMenu.add(pasteMenuItem);   
         //********************************************************
         //********************************************************
@@ -315,7 +325,7 @@ public class PaintImage extends JFrame implements MouseMotionListener,MouseListe
             });
         MBAAction.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent arg0) {
-                System.out.println("You have clicked on the new action MBA");
+                System.out.println("You have clicked on the new action MBA2D");
                 binaryTreeDebug = new BinaryTree();
                 binaryTreeColor = new BinaryTree();
                 try{
@@ -326,9 +336,26 @@ public class PaintImage extends JFrame implements MouseMotionListener,MouseListe
     			}
             }
         });
+        MBAAction1D.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent arg0) {
+                System.out.println("You have clicked on the new action MBA1D");
+                binaryTreeDebug = new BinaryTree();
+                binaryTreeColor = new BinaryTree();
+                try{
+                	((JMenuItem)popupMenu.getSubElements()[0]).setEnabled(false);
+	    			((JMenuItem)popupMenu.getSubElements()[1]).setEnabled(false);
+	    			((JMenuItem)popupMenu.getSubElements()[2]).setEnabled(true);
+                	loadCtrlPanel();
+                	//MBATest1D();
+    			}
+                catch(Exception e){
+                	e.printStackTrace();            			
+    			}
+            }
+        });
         MorphMBAAction.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent arg0) {
-                System.out.println("You have clicked on the new action MBA");
+                System.out.println("You have clicked on the new action MBAMorph");
                 binaryTreeDebug = new BinaryTree();
                 binaryTreeColor = new BinaryTree();
                 try{
@@ -341,6 +368,9 @@ public class PaintImage extends JFrame implements MouseMotionListener,MouseListe
                 	 * */
                 	 
                 	//MorphMBATest();
+                	((JMenuItem)popupMenu.getSubElements()[0]).setEnabled(true);
+	    			((JMenuItem)popupMenu.getSubElements()[1]).setEnabled(true);
+	    			((JMenuItem)popupMenu.getSubElements()[1]).setEnabled(false);
                 	loadCtrlPanel();
     			}
                 catch(Exception e){
@@ -505,7 +535,8 @@ public class PaintImage extends JFrame implements MouseMotionListener,MouseListe
 		}
 
         
-       layeredPane.add(topPanel,JLayeredPane.DEFAULT_LAYER);
+       //layeredPane.add(topPanel,JLayeredPane.DEFAULT_LAYER);
+       layeredPane.add(topPanel,layeredPane.getComponents().length);
        layeredPane.setPreferredSize(new Dimension(image.getWidth(), image.getHeight()));
 
        this.pack();
@@ -1865,7 +1896,7 @@ public class PaintImage extends JFrame implements MouseMotionListener,MouseListe
 		  		}
 		  	}
 		  	
-		  	MBA_new mba_new = new MBA_new(imageOrigR,(int)Hi,(int)Wi,32);
+		  	MBAN2D mba_new = new MBAN2D(imageOrigR,(int)Hi,(int)Wi,32);
 			long initime =  Calendar.getInstance().getTimeInMillis();
 			double[][] arrayOutTmpR=mba_new.calcoloMBA();
 			mba_new.initialize(imageOrigG,(int)Hi,(int)Wi,32);
@@ -2882,7 +2913,7 @@ public class PaintImage extends JFrame implements MouseMotionListener,MouseListe
 		  		}
 		  	}
 		  	
-		  	MBA_new mba_new = new MBA_new(imageOrigR,(int)Hi,(int)Wi,32);
+		  	MBAN2D mba_new = new MBAN2D(imageOrigR,(int)Hi,(int)Wi,32);
 			long initime =  Calendar.getInstance().getTimeInMillis();
 			double[][] arrayOutTmpR=mba_new.calcoloMBA();
 			mba_new.initialize(imageOrigG,(int)Hi,(int)Wi,32);
@@ -3500,7 +3531,7 @@ public class PaintImage extends JFrame implements MouseMotionListener,MouseListe
     	}
     	
     	if(imageType==1){
-	    	MBA_new mba_new = new MBA_new(imageOrigR,Hi,Wi,lattice);
+	    	MBAN2D mba_new = new MBAN2D(imageOrigR,Hi,Wi,lattice);
 	    	initime =  Calendar.getInstance().getTimeInMillis();
 	    	double[][] arrayOutTmpGrey=mba_new.calcoloMBA();
 	    	
@@ -3537,7 +3568,7 @@ public class PaintImage extends JFrame implements MouseMotionListener,MouseListe
 	    		JOptionPane.showMessageDialog(null, "Immagini uguali" , "InfoBox: PaintImage", JOptionPane.INFORMATION_MESSAGE);
     	}
     	else if(imageType==3){
-    		MBA_new mba_new = new MBA_new(imageOrigR,Hi,Wi,lattice);
+    		MBAN2D mba_new = new MBAN2D(imageOrigR,Hi,Wi,lattice);
 	    	initime =  Calendar.getInstance().getTimeInMillis();
 	    	arrayOutTmpR=mba_new.calcoloMBA();
 	    	mba_new.initialize(imageOrigG,Hi,Wi,lattice);
@@ -3700,7 +3731,7 @@ public class PaintImage extends JFrame implements MouseMotionListener,MouseListe
     	double fuctValBDouble=0; 	
     	
     	
-		MBA_new mba_new = new MBA_new(imageOrigRX,Hi,Wi,lattice);
+		MBAN2D mba_new = new MBAN2D(imageOrigRX,Hi,Wi,lattice);
     	initime =  Calendar.getInstance().getTimeInMillis();
     	arrayOutTmpRX=mba_new.calcoloMBA();
     	mba_new.initialize(imageOrigRY,Hi,Wi,lattice);
@@ -3761,7 +3792,7 @@ public class PaintImage extends JFrame implements MouseMotionListener,MouseListe
     	
     	//imagetmp = new BufferedImage((int)Wi, (int)Hi, BufferedImage.TYPE_INT_RGB);
     	
-    	MBA_new mba_new_morph = new MBA_new(imageOrigR,Hi,Wi,lattice);
+    	MBAN2D mba_new_morph = new MBAN2D(imageOrigR,Hi,Wi,lattice);
     	
     	arrayOutTmpR=mba_new_morph.calcoloMBA();
     	
@@ -3911,7 +3942,7 @@ public class PaintImage extends JFrame implements MouseMotionListener,MouseListe
     	double fuctValBDouble=0; 	
     	
     	
-		MBA_new mba_new = new MBA_new(imageOrigRX,Hi,Wi,lattice);
+		MBAN2D mba_new = new MBAN2D(imageOrigRX,Hi,Wi,lattice);
     	initime =  Calendar.getInstance().getTimeInMillis();
     	arrayOutTmpRX=mba_new.calcoloMBA();
     	mba_new.initialize(imageOrigRY,Hi,Wi,lattice);
@@ -3972,7 +4003,7 @@ public class PaintImage extends JFrame implements MouseMotionListener,MouseListe
     	
     	//imagetmp = new BufferedImage((int)Wi, (int)Hi, BufferedImage.TYPE_INT_RGB);
     	
-    	MBA_new mba_new_morph = new MBA_new(imageOrigR,Hi,Wi,lattice);
+    	MBAN2D mba_new_morph = new MBAN2D(imageOrigR,Hi,Wi,lattice);
     	
     	arrayOutTmpR=mba_new_morph.calcoloMBA();
     	
@@ -3993,6 +4024,167 @@ public class PaintImage extends JFrame implements MouseMotionListener,MouseListe
     	addImage(imagetmp,"morph_mba_total");
     	
     }    
+    
+//***********************************
+// MBA SPLINE
+//***********************************
+private void MBASpline(ArrayList<FourPointInt> displPointList) {
+	
+	java.awt.Component compImg=getVisibileComponent();
+	int Hi=0,Wi=0;
+	int HiOrig=0,WiOrig=0;
+	Color img_color=null;
+	Color img_color_tmp= new Color(0,0,0);
+	double[][] arrayOutTmp=null;
+	double[][] arrayOutTmpR=null;
+	double[][] arrayOutTmpG=null;
+	double[][] arrayOutTmpB=null;
+	BufferedImage imagetmp = null;
+	int imageType=1;
+	
+	/*Integer[] options = {1,2,4,8,16,32,64,128};
+    Integer n = (Integer)JOptionPane.showInputDialog(this, "Seleziona passo di campionamento:",
+            "Passo di campionamento in pixel", JOptionPane.QUESTION_MESSAGE, null, options, options[2]);
+    if(n==null)
+    	return;*/
+	int sample=1;
+		
+	//Integer[] optionsL = {1,2,4,8,16};
+	int lattice=0;
+    String lat = JOptionPane.showInputDialog(this, "Seleziona larghezza reticolo:",
+            "Larghezza reticolo", JOptionPane.QUESTION_MESSAGE);
+    if(lat==null)
+    	return;
+    try{
+    	lattice=Integer.parseInt(lat);
+    }catch(NumberFormatException e){
+    	JOptionPane.showMessageDialog(this, "Il valore inserito non è un numero: " + lat , "InfoBox: PaintImage", JOptionPane.INFORMATION_MESSAGE);
+    	return;
+    }
+    if(lattice<=0){
+    	JOptionPane.showMessageDialog(this, "Il valore inserito è un numero minore di 0: " + lat , "InfoBox: PaintImage", JOptionPane.INFORMATION_MESSAGE);
+    	return;
+    }
+       	
+    HiOrig=compImg.getHeight();
+	WiOrig=compImg.getWidth();
+	Graphics graphicOrig = compImg.getGraphics();
+	// creo una nuova immagine
+	imagetmp = new BufferedImage((int)WiOrig, (int)HiOrig, BufferedImage.TYPE_INT_RGB);
+	
+	Graphics g = imagetmp.getGraphics();
+    g.setColor(compImg.getForeground());
+    g.setFont(compImg.getFont());
+    compImg.paintAll(g);
+        
+    int ii=0;
+    int x0=0;
+    int y0=0;
+    double dist=0;
+    for(FourPointInt fourPoint : displPointList) {
+    	if(ii>0) {
+    		dist = dist + Math.sqrt(Math.pow(fourPoint.getX()-x0,2) + Math.pow(fourPoint.getY()-y0,2));
+    	}
+    	x0=fourPoint.getX();
+    	y0=fourPoint.getY();
+    	ii++;
+    }
+    Hi=1;
+	Wi=(int)Math.round(dist);
+    int[][] imageOrigX = new int[Wi][Hi];
+    int[][] imageOrigY = new int[Wi][Hi];
+    for(int i=0;(i<(Hi));i++){
+		for(int j=0;j<(Wi);j++){
+			imageOrigX[j][i]=-1;
+			imageOrigY[j][i]=-1;
+		}
+    }
+    dist=0;
+    ii=0;
+    for(FourPointInt fourPoint : displPointList) {
+    	if(ii>0) {
+    		dist = dist + Math.sqrt(Math.pow(fourPoint.getX()-x0,2) + Math.pow(fourPoint.getY()-y0,2));
+    		if((int)Math.round(dist)>=Wi)
+    			dist=Wi-1;
+    		imageOrigX[(int)Math.round(dist)][0]=fourPoint.getX();
+    		imageOrigY[(int)Math.round(dist)][0]=fourPoint.getY();
+    		
+    	}else {
+    		imageOrigX[0][0]=fourPoint.getX();
+    		imageOrigY[0][0]=fourPoint.getY();
+    	}
+    	x0=fourPoint.getX();
+    	y0=fourPoint.getY();
+    	ii++;
+    }   
+		
+	long initime=0;
+	long fintime=0;
+	int fuctValR=0;
+	int fuctValG=0;
+	int fuctValB=0;
+	
+	double fuctValRDouble=0;
+	double fuctValGDouble=0;
+	double fuctValBDouble=0;
+	
+	
+	if(imageType==1){
+    	MBAN1D mba_new = new MBAN1D(imageOrigX,Hi,Wi,lattice);
+    	initime =  Calendar.getInstance().getTimeInMillis();
+    	double[][] arrayOutTmpGreyX=mba_new.calcoloMBA();
+    	
+    	mba_new.initialize(imageOrigY,Hi,Wi,lattice);
+    	double[][] arrayOutTmpGreyY=mba_new.calcoloMBA();
+    	
+    	/*for(int i=0;(i<(HiOrig));i++){
+			for(int j=0;j<(WiOrig);j++){
+				img_color = new Color(255,255,255);
+				imagetmp.setRGB(j, i, img_color.getRGB());
+			}
+		}*/
+    	int X=0;
+    	int Y=0;
+    	for(int i=0;(i<(Hi));i++){
+			for(int j=0;j<(Wi);j++){
+				
+				X=(int)Math.round(arrayOutTmpGreyX[j][i]);
+				if(X>WiOrig)
+					X=WiOrig;
+				if(X<0)
+					X=0;
+				Y=(int)Math.round(arrayOutTmpGreyY[j][i]);
+				if(Y>HiOrig)
+					Y=HiOrig;
+				if(Y<0)
+					Y=0;
+				img_color = new Color(0,255,0);
+				imagetmp.setRGB(X, Y, img_color.getRGB());
+				/*if(X>1 && Y>1) {
+					imagetmp.setRGB(X-1, Y, img_color.getRGB());
+					imagetmp.setRGB(X+1, Y, img_color.getRGB());
+					imagetmp.setRGB(X, Y-1, img_color.getRGB());
+					imagetmp.setRGB(X, Y+1, img_color.getRGB());
+					imagetmp.setRGB(X-1, Y-1, img_color.getRGB());
+					imagetmp.setRGB(X-1, Y+1, img_color.getRGB());
+					imagetmp.setRGB(X+1, Y-1, img_color.getRGB());
+					imagetmp.setRGB(X+1, Y+1, img_color.getRGB());
+				}*/
+    		}
+    	}
+    	
+	}
+    	
+	//imagetmp = new BufferedImage((int)WiOrig, (int)HiOrig, BufferedImage.TYPE_INT_RGB);
+	
+	
+	fintime = Calendar.getInstance().getTimeInMillis();
+	JOptionPane.showMessageDialog(null, "Tempo elaborazione: " + (fintime-initime) , "InfoBox: PaintImage", JOptionPane.INFORMATION_MESSAGE);
+	addImage(imagetmp,"spline_mba_img_out_total_new");
+    	
+	
+	
+}
  
 //*************************************
 // loadCtrlPanel
@@ -4007,6 +4199,8 @@ public class PaintImage extends JFrame implements MouseMotionListener,MouseListe
     	Graphics graphicOrig = compImg.getGraphics();
     	// creo una nuova immagine
     	imagetmp = new BufferedImage((int)Wi, (int)Hi, BufferedImage.TYPE_INT_RGB);
+    	morph = new Morph();
+    	morph.setImageInput(imagetmp);
     	
     	Graphics g = imagetmp.getGraphics();
         g.setColor(compImg.getForeground());
@@ -4978,10 +5172,15 @@ public void generaReticolo(){
 	    	  }
 	    	  else if(e.getActionCommand().equals("Morphing")) {
 	    		  JPanelControlPoint jpcp = (JPanelControlPoint)getVisibileComponent();
-	    		  jpcp.getDisplacement();
+	    		  if(morph!=null)
+	    			  MorphMBADispl(morph.getImageInput(),jpcp.getDisplacement());
 	    	  }
-	      }    
-	   }   
+	    	  else if(e.getActionCommand().equals("MBASpline")) {
+	    		  JPanelControlPoint jpcp = (JPanelControlPoint)getVisibileComponent();
+	    		  MBASpline(jpcp.getControlPoint());
+	      	  }
+	     }    
+	}   
 	
 	/*class PopClickListener extends MouseAdapter {
 	    public void mousePressed(MouseEvent e) {

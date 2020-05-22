@@ -142,6 +142,7 @@ public class PaintImage extends JFrame implements MouseMotionListener,MouseListe
         // utility
         JMenuItem imgDiffAction = new JMenuItem("Image Diff");
         JMenuItem sincAction = new JMenuItem("Sinc function generator");
+        JMenuItem edgeDetectAction = new JMenuItem("Canny-edge detector");
         // Create and add CheckButton as a menu item to one of the drop down
         // menu
         JCheckBoxMenuItem checkAction = new JCheckBoxMenuItem("Debug OFF");
@@ -180,6 +181,7 @@ public class PaintImage extends JFrame implements MouseMotionListener,MouseListe
         // statistiche
         stitisticheMenu.add(imgDiffAction);
         stitisticheMenu.add(sincAction);
+        stitisticheMenu.add(edgeDetectAction);
 //        editMenu.add(radioAction1);
 //        editMenu.add(radioAction2);
         //************************************
@@ -393,6 +395,19 @@ public class PaintImage extends JFrame implements MouseMotionListener,MouseListe
     			}
             }
         });
+        edgeDetectAction.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent arg0) {
+                System.out.println("You have clicked on the new action MBA");
+                binaryTreeDebug = new BinaryTree();
+                binaryTreeColor = new BinaryTree();
+                try{
+                	CannyEdgeDetect();
+    			}
+                catch(Exception e){
+                	e.printStackTrace();            			
+    			}
+            }
+        });
         imgDiffAction.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent arg0) {
                 System.out.println("You have clicked on the Image Diff");
@@ -423,10 +438,14 @@ public class PaintImage extends JFrame implements MouseMotionListener,MouseListe
           System.exit(1);
         }
         ImageIcon imageIcon = new ImageIcon(image);
-        JLabel jLabel = new JLabel();
+        JLabel jLabel = new JLabel(imageIcon,JLabel.LEFT);
+        jLabel.setLocation(0, 0);
+        jLabel.setSize(image.getWidth(), image.getHeight());
+        //jLabel.setHorizontalAlignment(JLabel.LEFT);
+        jLabel.setVerticalAlignment(JLabel.TOP);
         jLabel.addMouseListener(this);
         jLabel.addMouseMotionListener(this);
-        jLabel.setIcon(imageIcon);
+        //jLabel.setIcon(imageIcon);
         jLabel.setName(fileimg.getName());
         // ripulisce dalle immagini precedenti
         /*for (java.awt.Component comp : this.getContentPane().getComponents()){
@@ -437,6 +456,7 @@ public class PaintImage extends JFrame implements MouseMotionListener,MouseListe
         JPanel topPanel = new JPanel();
 		topPanel.setLayout(new BorderLayout());
 		topPanel.add(jLabel);
+		jLabel.setLocation(0, 0);
 		topPanel.setBounds(0, 0, image.getWidth(), image.getHeight());
 		topPanel.setLocation(0, 0);
 		topPanel.setName(jLabel.getName());
@@ -4185,7 +4205,197 @@ private void MBASpline(ArrayList<FourPointInt> displPointList) {
 	
 	
 }
- 
+//***********************************
+// CANNY EDGE DETECT
+//***********************************
+private void CannyEdgeDetect(){
+	java.awt.Component compImg=getVisibileComponent();
+	int Hi=0,Wi=0;
+	Color img_color=null;
+	Color img_color_tmp= new Color(0,0,0);
+	double[][] arrayOutTmpR=null;
+	double[][] arrayOutTmpG=null;
+	double[][] arrayOutTmpB=null;
+	double[][] arrayOutTmpRX=null;
+	double[][] arrayOutTmpGX=null;
+	double[][] arrayOutTmpBX=null;
+	double[][] arrayOutTmpRY=null;
+	double[][] arrayOutTmpGY=null;
+	double[][] arrayOutTmpBY=null;
+	BufferedImage imagetmp = null;
+	BufferedImage imagetmp_pre = null;
+	BufferedImage imagetmpX = null;
+	BufferedImage imagetmpY = null;
+	int imageType=1;
+	
+	Hi=compImg.getHeight();
+	Wi=compImg.getWidth();
+	Graphics graphicOrig = compImg.getGraphics();
+	// creo una nuova immagine
+	imagetmp = new BufferedImage((int)Wi, (int)Hi, BufferedImage.TYPE_INT_RGB);
+	
+	Graphics g = imagetmp.getGraphics();
+    g.setColor(compImg.getForeground());
+    g.setFont(compImg.getFont());
+    compImg.paintAll(g);
+     
+    int[][] imageOrigR = new int[Wi][Hi];
+    int[][] imageOrigG = new int[Wi][Hi];
+    int[][] imageOrigB = new int[Wi][Hi];
+    
+    int[][] GIX = new int[Wi][Hi];
+    int[][] GIY = new int[Wi][Hi];
+    double[][] F = new double[Wi][Hi];
+    
+    for(int i=1;(i<(Hi-1));i++){
+		for(int j=1;j<(Wi-1);j++){
+			img_color = new Color(imagetmp.getRGB(j,i));
+			imageOrigR[j][i] = img_color.getRed();
+			imageOrigG[j][i] = img_color.getGreen();
+			imageOrigB[j][i] = img_color.getBlue();	
+			
+			GIX[j][i] = GIY[j][i] = 0;
+			F[j][i] = imageOrigR[j][i];
+		}
+	}
+    
+    int[][] GX = new int[3][3];
+    int[][] GY = new int[3][3];
+    
+    double[][] W = new double[Wi][Hi];
+    
+    GX[0][0] = 1;
+    GX[0][1] = 0;
+    GX[0][2] = -1;
+    GX[1][0] = 1;
+    GX[1][1] = 0;
+    GX[1][2] = -1;
+    GX[2][0] = 1;
+    GX[2][1] = 0;
+    GX[2][2] = -1;
+    
+    GY[0][0] = 1;
+    GY[0][1] = 1;
+    GY[0][2] = 1;
+    GY[1][0] = 0;
+    GY[1][1] = 0;
+    GY[1][2] = 0;
+    GY[2][0] = -1;
+    GY[2][1] = -1;
+    GY[2][2] = -1;
+    double h=32;
+    double h2 = h*h*2;
+    double N=0,Ftmp=0;
+    int GXt=0,GYt=0;
+    //**********************************************
+    // calcolo gradienti con sobel per ora solo B/N
+    //**********************************************
+    for(int i=1;(i<(Hi-1));i++){
+		for(int j=1;j<(Wi-1);j++){
+			GXt=GYt=0;
+			for(int ii=-1; ii<2;ii++) {
+		    	for(int jj=-1;jj<2;jj++) {
+		    		GXt = GXt + GX[jj+1][ii+1]*imageOrigR[j+jj][i+ii];
+		    		GYt = GYt + GY[jj+1][ii+1]*imageOrigR[j+jj][i+ii];
+		    	}
+		    }
+			GIX[j][i]=GXt;
+			GIY[j][i]=GYt;
+		}
+	}
+    
+    //*****************************************************
+    // metto il gradinte al quadrato per essere filtrato
+    //*****************************************************
+    /*for(int i=1;(i<(Hi-1));i++){
+		for(int j=1;j<(Wi-1);j++){
+			//F[j][i] = (int)Math.round(Math.sqrt(Math.pow(GIX[j][i],2) + Math.pow(GIY[j][i],2)));
+			F[j][i] = (int)Math.round((Math.pow(GIX[j][i],2) + Math.pow(GIY[j][i],2)));
+			int col = (int) Math.round(F[j][i]);
+		    if(col>255)
+		    	col=255;
+		    if(col<0)
+		    	col=0;
+		    img_color = new Color(col,col,col);
+			imagetmp.setRGB(j, i, img_color.getRGB());
+		}
+	}
+    addImage(imagetmp,"canny_edge_detect_img_out_gradient");*/
+    
+    
+    for(int i=1;(i<(Hi-1));i++){
+		for(int j=1;j<(Wi-1);j++){
+		    
+		    W[j][i]=Math.exp(-1 * Math.sqrt(Math.pow(GIX[j][i],2) + Math.pow(GIY[j][i],2)) / h2); 
+		    
+		}
+	}
+    
+    imagetmp = new BufferedImage((int)Wi, (int)Hi, BufferedImage.TYPE_INT_RGB);
+    for(int i=1;(i<(Hi-1));i++){
+		for(int j=1;j<(Wi-1);j++){
+			N=0;
+		    for(int ii=-1; ii<2;ii++) {
+		    	for(int jj=-1;jj<2;jj++) {
+		    		N = N + W[j+jj][i+ii];
+		    	}
+		    }
+		    Ftmp=0;
+		    for(int ii=-1; ii<2;ii++) {
+		    	for(int jj=-1;jj<2;jj++) {
+		    		Ftmp = Ftmp + F[j+jj][i+ii] * W[j+jj][i+ii];
+		    	}
+		    }
+		    F[j][i] = Ftmp/N;
+		    int col = (int) Math.round(F[j][i]);
+		    if(col>255)
+		    	col=255;
+		    if(col<0)
+		    	col=0;
+		    img_color = new Color(col,col,col);
+			imagetmp.setRGB(j, i, img_color.getRGB());
+			imageOrigR[j][i]=col;
+		}
+	}
+    
+    // creo una nuova immagine
+ 	//imagetmp = new BufferedImage((int)Wi, (int)Hi, BufferedImage.TYPE_INT_RGB);
+ 	addImage(imagetmp,"canny_edge_detect_img_out_total");
+    
+ 	imagetmp = new BufferedImage((int)Wi, (int)Hi, BufferedImage.TYPE_INT_RGB);
+ 	for(int i=1;(i<(Hi-1));i++){
+		for(int j=1;j<(Wi-1);j++){
+			GXt=GYt=0;
+			for(int ii=-1; ii<2;ii++) {
+		    	for(int jj=-1;jj<2;jj++) {
+		    		GXt = GXt + GX[jj+1][ii+1]*imageOrigR[j+jj][i+ii];
+		    		GYt = GYt + GY[jj+1][ii+1]*imageOrigR[j+jj][i+ii];
+		    	}
+		    }
+			GIX[j][i]=GXt;
+			GIY[j][i]=GYt;
+		}
+	}
+ 	
+ 	//*****************************************************
+    // metto il gradinte al quadrato per essere filtrato
+    //*****************************************************
+    for(int i=1;(i<(Hi-1));i++){
+		for(int j=1;j<(Wi-1);j++){
+			F[j][i] = (int)Math.round(Math.sqrt(Math.pow(GIX[j][i],2) + Math.pow(GIY[j][i],2)));
+			//F[j][i] = (int)Math.round((Math.pow(GIX[j][i],2) + Math.pow(GIY[j][i],2)));
+			int col = (int) Math.round(F[j][i]);
+		    if(col>255)
+		    	col=255;
+		    if(col<0)
+		    	col=0;
+		    img_color = new Color(col,col,col);
+			imagetmp.setRGB(j, i, img_color.getRGB());
+		}
+	}
+    addImage(imagetmp,"canny_edge_detect_img_out_gradient");
+}
+
 //*************************************
 // loadCtrlPanel
 //*************************************

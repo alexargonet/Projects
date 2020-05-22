@@ -331,7 +331,9 @@ public JPanelControlPoint(int width, int height, int gridDivisions) {
 		   private Point2D pc;
 		   private Point2D pp;
 		   
-	
+		   //********************************************
+		   // PULSANTE PRESSED MOUSE
+		   //********************************************
 		   @Override
 		   public void mousePressed(MouseEvent e) {
 			   if(bPhase1) {
@@ -370,39 +372,41 @@ public JPanelControlPoint(int width, int height, int gridDivisions) {
 					  }*/
 					   // controlo se il punto cliccato appartiene a qualche spigolo della poligonale
 					   // nel caso recupera lo spigolo precedente e successivo se presenti
-					   for (ArrayList<Ellipse2Dextd> ellipses : ellipseXtdList1) {
-						   for (int i = 0; i < ellipses.size(); i++) {
-							   Ellipse2Dextd endPt = ellipses.get(i);
-							   // cotrolla se il punto del cliccato dal mouse è in qualche poligonale
-							   if(endPt.getEllipse().contains(e.getPoint())) {
-								   pb = new Point2D.Double(endPt.getEllipse().getCenterX(), endPt.getEllipse().getCenterY());
-								   pc = new Point2D.Double(endPt.getEllipse().getCenterX(), endPt.getEllipse().getCenterY());
-								   pp = new Point2D.Double(endPt.getEllipse().getCenterX(), endPt.getEllipse().getCenterY());
-								   ellipseDrag = new EllipseDrag();
-								   // setta il punto centrale o cliccato
-								   ellipseDrag.setEllipsec(endPt);
-								   drawingLineb=null;
-								   drawingLinep=null;
-								   //recupera il punto precedente b=beforese presente
-								   if(i-1>=0){
-									   ellipseDrag.setEllipseb(ellipses.get(Math.abs(i - 1)));
-									   pb.setLocation(ellipses.get(Math.abs(i - 1)).getEllipse().getCenterX(),ellipses.get(Math.abs(i - 1)).getEllipse().getCenterY());
-									   drawingLineb = new Line2D.Double(pb, pc);
+					   //if(e.getClickCount() == 2) {
+						   for (ArrayList<Ellipse2Dextd> ellipses : ellipseXtdList1) {
+							   for (int i = 0; i < ellipses.size(); i++) {
+								   Ellipse2Dextd endPt = ellipses.get(i);
+								   // cotrolla se il punto del cliccato dal mouse è in qualche poligonale
+								   if(endPt.getEllipse().contains(e.getPoint())) {
+									   pb = new Point2D.Double(endPt.getEllipse().getCenterX(), endPt.getEllipse().getCenterY());
+									   pc = new Point2D.Double(endPt.getEllipse().getCenterX(), endPt.getEllipse().getCenterY());
+									   pp = new Point2D.Double(endPt.getEllipse().getCenterX(), endPt.getEllipse().getCenterY());
+									   ellipseDrag = new EllipseDrag();
+									   // setta il punto centrale o cliccato
+									   ellipseDrag.setEllipsec(endPt);
+									   drawingLineb=null;
+									   drawingLinep=null;
+									   //recupera il punto precedente b=beforese presente
+									   if(i-1>=0){
+										   ellipseDrag.setEllipseb(ellipses.get(Math.abs(i - 1)));
+										   pb.setLocation(ellipses.get(Math.abs(i - 1)).getEllipse().getCenterX(),ellipses.get(Math.abs(i - 1)).getEllipse().getCenterY());
+										   drawingLineb = new Line2D.Double(pb, pc);
+									   }
+									   // recupera il punto successivo p=post se presente
+									   if(i+1<ellipses.size()){
+										   ellipseDrag.setEllipsep(ellipses.get(Math.abs(i + 1)));
+										   pp.setLocation(ellipses.get(Math.abs(i + 1)).getEllipse().getCenterX(),ellipses.get(Math.abs(i + 1)).getEllipse().getCenterY());
+										   drawingLinep = new Line2D.Double(pc, pp);
+									   }
+									   drawingCirclec = new Ellipse2D.Double(pc.getX()- ELLIPSE_DIAMETER / 2,pc.getY()- ELLIPSE_DIAMETER / 2,ELLIPSE_DIAMETER,ELLIPSE_DIAMETER);
+									   // entra nello stato DRAGGING
+									   mouseState = MouseState.DRAGGING;
+									   repaint();
+									   return;
 								   }
-								   // recupera il punto successivo p=post se presente
-								   if(i+1<ellipses.size()){
-									   ellipseDrag.setEllipsep(ellipses.get(Math.abs(i + 1)));
-									   pp.setLocation(ellipses.get(Math.abs(i + 1)).getEllipse().getCenterX(),ellipses.get(Math.abs(i + 1)).getEllipse().getCenterY());
-									   drawingLinep = new Line2D.Double(pc, pp);
-								   }
-								   drawingCirclec = new Ellipse2D.Double(pc.getX()- ELLIPSE_DIAMETER / 2,pc.getY()- ELLIPSE_DIAMETER / 2,ELLIPSE_DIAMETER,ELLIPSE_DIAMETER);
-								   // entra nello stato DRAGGING
-								   mouseState = MouseState.DRAGGING;
-								   repaint();
-								   return;
 							   }
 						   }
-					   }
+					   //}
 		
 					   p0=p1; 
 					   p1 = e.getPoint();
@@ -422,39 +426,41 @@ public JPanelControlPoint(int width, int height, int gridDivisions) {
 
 					   // controlo se il punto cliccato appartiene a qualche spigolo della poligonale
 					   // nel caso recupera lo spigolo precedente e successivo se presenti
-					   for (ArrayList<Ellipse2Dextd> ellipses : ellipseXtdList2) {
-						   for (int i = 0; i < ellipses.size(); i++) {
-							   Ellipse2Dextd endPt = ellipses.get(i);
-							   // cotrolla se il punto del cliccato dal mouse è in qualche poligonale
-							   if(endPt.getEllipse().contains(e.getPoint())) {
-								   pb = new Point2D.Double(endPt.getEllipse().getCenterX(), endPt.getEllipse().getCenterY());
-								   pc = new Point2D.Double(endPt.getEllipse().getCenterX(), endPt.getEllipse().getCenterY());
-								   pp = new Point2D.Double(endPt.getEllipse().getCenterX(), endPt.getEllipse().getCenterY());
-								   ellipseDrag = new EllipseDrag();
-								   // setta il punto centrale o cliccato
-								   ellipseDrag.setEllipsec(endPt);
-								   drawingLineb=null;
-								   drawingLinep=null;
-								   //recupera il punto precedente b=beforese presente
-								   if(i-1>=0){
-									   ellipseDrag.setEllipseb(ellipses.get(Math.abs(i - 1)));
-									   pb.setLocation(ellipses.get(Math.abs(i - 1)).getEllipse().getCenterX(),ellipses.get(Math.abs(i - 1)).getEllipse().getCenterY());
-									   drawingLineb = new Line2D.Double(pb, pc);
+					   //if(e.getClickCount() == 2) {
+						   for (ArrayList<Ellipse2Dextd> ellipses : ellipseXtdList2) {
+							   for (int i = 0; i < ellipses.size(); i++) {
+								   Ellipse2Dextd endPt = ellipses.get(i);
+								   // cotrolla se il punto del cliccato dal mouse è in qualche poligonale
+								   if(endPt.getEllipse().contains(e.getPoint())) {
+									   pb = new Point2D.Double(endPt.getEllipse().getCenterX(), endPt.getEllipse().getCenterY());
+									   pc = new Point2D.Double(endPt.getEllipse().getCenterX(), endPt.getEllipse().getCenterY());
+									   pp = new Point2D.Double(endPt.getEllipse().getCenterX(), endPt.getEllipse().getCenterY());
+									   ellipseDrag = new EllipseDrag();
+									   // setta il punto centrale o cliccato
+									   ellipseDrag.setEllipsec(endPt);
+									   drawingLineb=null;
+									   drawingLinep=null;
+									   //recupera il punto precedente b=beforese presente
+									   if(i-1>=0){
+										   ellipseDrag.setEllipseb(ellipses.get(Math.abs(i - 1)));
+										   pb.setLocation(ellipses.get(Math.abs(i - 1)).getEllipse().getCenterX(),ellipses.get(Math.abs(i - 1)).getEllipse().getCenterY());
+										   drawingLineb = new Line2D.Double(pb, pc);
+									   }
+									   // recupera il punto successivo p=post se presente
+									   if(i+1<ellipses.size()){
+										   ellipseDrag.setEllipsep(ellipses.get(Math.abs(i + 1)));
+										   pp.setLocation(ellipses.get(Math.abs(i + 1)).getEllipse().getCenterX(),ellipses.get(Math.abs(i + 1)).getEllipse().getCenterY());
+										   drawingLinep = new Line2D.Double(pc, pp);
+									   }
+									   drawingCirclec = new Ellipse2D.Double(pc.getX()- ELLIPSE_DIAMETER / 2,pc.getY()- ELLIPSE_DIAMETER / 2,ELLIPSE_DIAMETER,ELLIPSE_DIAMETER);
+									   // entra nello stato DRAGGING
+									   mouseState = MouseState.DRAGGING;
+									   repaint();
+									   return;
 								   }
-								   // recupera il punto successivo p=post se presente
-								   if(i+1<ellipses.size()){
-									   ellipseDrag.setEllipsep(ellipses.get(Math.abs(i + 1)));
-									   pp.setLocation(ellipses.get(Math.abs(i + 1)).getEllipse().getCenterX(),ellipses.get(Math.abs(i + 1)).getEllipse().getCenterY());
-									   drawingLinep = new Line2D.Double(pc, pp);
-								   }
-								   drawingCirclec = new Ellipse2D.Double(pc.getX()- ELLIPSE_DIAMETER / 2,pc.getY()- ELLIPSE_DIAMETER / 2,ELLIPSE_DIAMETER,ELLIPSE_DIAMETER);
-								   // entra nello stato DRAGGING
-								   mouseState = MouseState.DRAGGING;
-								   repaint();
-								   return;
 							   }
 						   }
-					   }
+					   //}
 
 					   p0=p1; 
 					   p1 = e.getPoint();
@@ -467,6 +473,9 @@ public JPanelControlPoint(int width, int height, int gridDivisions) {
 		   /* (non-Javadoc)
 		    * @see java.awt.event.MouseAdapter#mouseMoved(java.awt.event.MouseEvent)
 		    */
+		   //****************************************************
+		   // MOUSE MOVE
+		   //****************************************************
 		   @Override
 		   public void mouseMoved(MouseEvent e){
 			   if(bPhase1) {
@@ -483,6 +492,9 @@ public JPanelControlPoint(int width, int height, int gridDivisions) {
 		 /* (non-Javadoc)
 		 * @see java.awt.event.MouseAdapter#mouseDragged(java.awt.event.MouseEvent)
 		 */
+		//*******************************
+		// MOUSE DRAGGED
+		//*******************************
 		@Override
 		public void mouseDragged(MouseEvent e) {
 			if(bPhase1) {
@@ -533,10 +545,18 @@ public JPanelControlPoint(int width, int height, int gridDivisions) {
 				}
 			}
 		}
-	
+		//*****************************************
+		//   MOUSE RELEASEd
+		//*****************************************
 		   @Override
 		   public void mouseReleased(MouseEvent e) {
 			   super.mouseReleased(e);
+			   /*if(e.getClickCount() == 2) {
+				   if(originFrame!=null)
+					   originFrame.mouseReleased(e);
+				   return;
+			   }*/
+				   
 			   if(bPhase1) {
 				   
 				   /*if (drawingLine != null) {
@@ -658,125 +678,6 @@ public JPanelControlPoint(int width, int height, int gridDivisions) {
 		   }
 	   }
 	   
-   
-//   	else
-//	   {
-//		   private Point2D p0;
-//		   private Point2D p1;
-//		   
-//		   private Point2D pb;
-//		   private Point2D pc;
-//		   private Point2D pp;
-//		   
-//
-//		   @Override
-//		   public void mousePressed(MouseEvent e) {
-//
-//			   if (e.getButton() == MouseEvent.BUTTON1) {
-//
-//				   // controlo se il punto cliccato appartiene a qualche spigolo della poligonale
-//				   // nel caso recupera lo spigolo precedente e successivo se presenti
-//				   for (List<Ellipse2Dextd> ellipses : ellipseXtdList2) {
-//					   for (int i = 0; i < ellipses.size(); i++) {
-//						   Ellipse2Dextd endPt = ellipses.get(i);
-//						   // cotrolla se il punto del cliccato dal mouse è in qualche poligonale
-//						   if(endPt.getEllipse().contains(e.getPoint())) {
-//							   pb = new Point2D.Double(endPt.getEllipse().getCenterX(), endPt.getEllipse().getCenterY());
-//							   pc = new Point2D.Double(endPt.getEllipse().getCenterX(), endPt.getEllipse().getCenterY());
-//							   pp = new Point2D.Double(endPt.getEllipse().getCenterX(), endPt.getEllipse().getCenterY());
-//							   ellipseDrag = new EllipseDrag();
-//							   // setta il punto centrale o cliccato
-//							   ellipseDrag.setEllipsec(endPt);
-//							   drawingLineb=null;
-//							   drawingLinep=null;
-//							   //recupera il punto precedente b=beforese presente
-//							   if(i-1>=0){
-//								   ellipseDrag.setEllipseb(ellipses.get(Math.abs(i - 1)));
-//								   pb.setLocation(ellipses.get(Math.abs(i - 1)).getEllipse().getCenterX(),ellipses.get(Math.abs(i - 1)).getEllipse().getCenterY());
-//								   drawingLineb = new Line2D.Double(pb, pc);
-//							   }
-//							   // recupera il punto successivo p=post se presente
-//							   if(i+1<ellipses.size()){
-//								   ellipseDrag.setEllipsep(ellipses.get(Math.abs(i + 1)));
-//								   pp.setLocation(ellipses.get(Math.abs(i + 1)).getEllipse().getCenterX(),ellipses.get(Math.abs(i + 1)).getEllipse().getCenterY());
-//								   drawingLinep = new Line2D.Double(pc, pp);
-//							   }
-//							   drawingCirclec = new Ellipse2D.Double(pc.getX()- ELLIPSE_DIAMETER / 2,pc.getY()- ELLIPSE_DIAMETER / 2,ELLIPSE_DIAMETER,ELLIPSE_DIAMETER);
-//							   // entra nello stato DRAGGING
-//							   mouseState = MouseState.DRAGGING;
-//							   repaint();
-//							   return;
-//						   }
-//					   }
-//				   }
-//
-//				   p0=p1; 
-//				   p1 = e.getPoint();
-//				   repaint();
-//			   }
-//		   }
-//
-//		   /* (non-Javadoc)
-//			 * @see java.awt.event.MouseAdapter#mouseDragged(java.awt.event.MouseEvent)
-//			 */
-//			@Override
-//			public void mouseDragged(MouseEvent e) {
-//				
-//				if(mouseState == MouseState.DRAGGING){
-//					if(ellipseDrag!=null){
-//					   drawingLineb=null;
-//					   drawingLinep=null;
-//					   pc.setLocation(e.getX(),e.getY());
-//					   if(ellipseDrag.getEllipseb()!=null){
-//						   pb.setLocation(ellipseDrag.getEllipseb().getEllipse().getCenterX(),ellipseDrag.getEllipseb().getEllipse().getCenterY());
-//						   drawingLineb = new Line2D.Double(pb, pc);
-//					   }
-//					   if(ellipseDrag.getEllipsep()!=null){
-//						   pp.setLocation(ellipseDrag.getEllipsep().getEllipse().getCenterX(),ellipseDrag.getEllipsep().getEllipse().getCenterY());
-//						   drawingLinep = new Line2D.Double(pc, pp);
-//					   }
-//					   drawingCirclec = new Ellipse2D.Double(pc.getX()- ELLIPSE_DIAMETER / 2,pc.getY()- ELLIPSE_DIAMETER / 2,ELLIPSE_DIAMETER,ELLIPSE_DIAMETER);
-//					   repaint();
-//					}
-//				}
-//			}
-//
-//		   @Override
-//		   public void mouseReleased(MouseEvent e) {
-//			   super.mouseReleased(e);
-//
-//			   if(e.getButton() == MouseEvent.BUTTON1 && mouseState == MouseState.DRAGGING){
-//				   if(mouseState == MouseState.DRAGGING){
-//						if(ellipseDrag!=null){
-//							double x1 = e.getX() - ELLIPSE_DIAMETER / 2;
-//							double y1 = e.getY() - ELLIPSE_DIAMETER / 2;
-//							ellipseDrag.getEllipsec().getEllipse().setFrame(x1, y1, ELLIPSE_DIAMETER, ELLIPSE_DIAMETER);
-//							ellipseDrag=null;
-//						    drawingCirclec=null;
-//						    drawingLineb=null;
-//						    drawingLinep=null;
-//						    mouseState = MouseState.IDLE;
-//						    repaint();
-//						}
-//				   }
-//			   }
-//			   else if(e.getButton() == MouseEvent.BUTTON3) {
-//				   if(mouseState != MouseState.IDLE){
-//					   mouseState = MouseState.IDLE;
-//					   drawingCircle=null;
-//					   drawingLine=null;
-//					   ellipseDrag=null;
-//					   drawingCirclec=null;
-//					   drawingLineb=null;
-//					   drawingLinep=null;
-//					   repaint();
-//				   }
-//			   }
-//			   if(originFrame!=null)
-//				   originFrame.mouseReleased(e);
-//		   }
-//	   }
-//   }
    
    
    public Boolean getbPhase1() {

@@ -61,9 +61,11 @@ import ricostruzione.MBA;
 import ricostruzione.MBAN1D;
 import ricostruzione.MBAN2D;
 import ricostruzione.Morph;
+import ricostruzione.Snakes;
 import utility.BinaryTree;
 import utility.ColorArray;
 import utility.FourPointInt;
+import utility.ImageU;
 import utility.TreeNode;
 import utility.Utility;
 import utility.Vettore;
@@ -80,6 +82,7 @@ public class PaintImage extends JFrame implements MouseMotionListener,MouseListe
 	JScrollPane scrollpane=null;
 	JLayeredPane layeredPane=null;
 	JPopupMenu popupMenu=null;
+	PaintImage pintImage = this;
 	
 	MBADialog frameMBA=null;
 	Morph morph=null;
@@ -139,6 +142,10 @@ public class PaintImage extends JFrame implements MouseMotionListener,MouseListe
         JMenuItem MBAAction1D = new JMenuItem("MBA1D");
         // morphing
         JMenuItem MorphMBAAction = new JMenuItem("Morphing MBA");
+        // snakes active Countour detection
+        JMenu ActiveCDAction = new JMenu("Active Countour Detection");
+        JMenuItem SnakesAction = new JMenuItem("Snakes Kass");
+        ActiveCDAction.add(SnakesAction);
         // utility
         JMenuItem imgDiffAction = new JMenuItem("Image Diff");
         JMenuItem sincAction = new JMenuItem("Sinc function generator");
@@ -178,6 +185,7 @@ public class PaintImage extends JFrame implements MouseMotionListener,MouseListe
         filtriMenu.add(MBAAction);
         filtriMenu.add(MBAAction1D);
         filtriMenu.add(MorphMBAAction);
+        filtriMenu.add(ActiveCDAction);
         // statistiche
         stitisticheMenu.add(imgDiffAction);
         stitisticheMenu.add(sincAction);
@@ -374,6 +382,33 @@ public class PaintImage extends JFrame implements MouseMotionListener,MouseListe
 	    			((JMenuItem)popupMenu.getSubElements()[1]).setEnabled(true);
 	    			((JMenuItem)popupMenu.getSubElements()[1]).setEnabled(false);
                 	loadCtrlPanel();
+    			}
+                catch(Exception e){
+                	e.printStackTrace();            			
+    			}
+            }
+        });
+        SnakesAction.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent arg0) {
+                System.out.println("You have clicked on the new action snakes");
+                binaryTreeDebug = new BinaryTree();
+                binaryTreeColor = new BinaryTree();
+                try{
+                	/*frameMBA = new MBADialog();
+                	//frameMBA.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+                	frameMBA.setLocationRelativeTo(null);
+                	frameMBA.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+                	frameMBA.setVisible(true);
+                	//frameMBA.set
+                	 * */
+                	 
+                	//MorphMBATest();
+                	//((JMenuItem)popupMenu.getSubElements()[0]).setEnabled(true);
+	    			//((JMenuItem)popupMenu.getSubElements()[1]).setEnabled(true);
+	    			//((JMenuItem)popupMenu.getSubElements()[1]).setEnabled(false);
+                	ImageU img = new ImageU(pintImage);
+                	Snakes snake = new Snakes(img,pintImage);
+                	loadCtrlPanel(snake);
     			}
                 catch(Exception e){
                 	e.printStackTrace();            			
@@ -4431,6 +4466,31 @@ private void CannyEdgeDetect(){
         this.setLocationRelativeTo(null);
         this.setVisible(true);
         jpanelCP.repaint();
+        this.repaint();
+        updateMenuOpenImg();
+        
+    }
+    
+    private void loadCtrlPanel(JPanel jpanel){
+    	
+  
+    	int Hi=jpanel.getHeight();
+    	int Wi=jpanel.getWidth();
+    	  
+        //JPanelControlPoint jpanelCP= new JPanelControlPoint(imagetmp,this);
+        
+ 		for(java.awt.Component layer : layeredPane.getComponents()){
+ 			layer.setVisible(false);
+ 		}
+
+         
+        layeredPane.add(jpanel,layeredPane.getComponents().length);
+        layeredPane.setPreferredSize(new Dimension(Wi, Hi));
+
+        this.pack();
+        this.setLocationRelativeTo(null);
+        this.setVisible(true);
+        jpanel.repaint();
         this.repaint();
         updateMenuOpenImg();
         

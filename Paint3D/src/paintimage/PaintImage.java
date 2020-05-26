@@ -528,7 +528,7 @@ public class PaintImage extends JFrame implements MouseMotionListener,MouseListe
 //*********************************************************************
 //  ADD IMAGE
 //*********************************************************************//    
-   private void addImage(BufferedImage image,String nomeImg){
+   public void addImage(BufferedImage image,String nomeImg){
    	
        ImageIcon imageIcon = new ImageIcon(image);
        JLabel jLabel = new JLabel();

@@ -751,6 +751,14 @@ public JPanelControlPoint(int width, int height, int gridDivisions) {
 		}
 		return morphDisplList;
 	}
+
+	public BufferedImage getBufImage() {
+		return bufImage;
+	}
+
+	public void setBufImage(BufferedImage bufImage) {
+		this.bufImage = bufImage;
+	}
 	
 }
 

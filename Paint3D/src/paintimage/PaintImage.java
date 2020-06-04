@@ -1,5 +1,8 @@
 package paintimage;
 
+//**************************************************************************
+//**  git push https://github.com/alexargonet/Projects.git HEAD:master
+//**************************************************************************
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -4243,6 +4246,9 @@ private void MBASpline(ArrayList<FourPointInt> displPointList) {
 //***********************************
 // CANNY EDGE DETECT
 //***********************************
+//******************************************************//
+//* 5 giu 2020-11:49:12-			                   *//	   
+//******************************************************//
 private void CannyEdgeDetect(){
 	java.awt.Component compImg=getVisibileComponent();
 	int Hi=0,Wi=0;
@@ -4262,21 +4268,31 @@ private void CannyEdgeDetect(){
 	BufferedImage imagetmpX = null;
 	BufferedImage imagetmpY = null;
 	int imageType=1;
+	Snakes jpcp=null;
 	
-	Hi=compImg.getHeight();
-	Wi=compImg.getWidth();
-	Graphics graphicOrig = compImg.getGraphics();
-	// creo una nuova immagine
-	imagetmp = new BufferedImage((int)Wi, (int)Hi, BufferedImage.TYPE_INT_RGB);
-	
-	Graphics g = imagetmp.getGraphics();
-    g.setColor(compImg.getForeground());
-    g.setFont(compImg.getFont());
-    compImg.paintAll(g);
-     
+	if(getVisibileComponent() instanceof Snakes) {
+		jpcp = (Snakes)getVisibileComponent();
+		imagetmp=jpcp.getBufImage();
+		Hi=imagetmp.getHeight();
+		Wi=imagetmp.getWidth();
+	}
+	else {
+		Hi=compImg.getHeight();
+		Wi=compImg.getWidth();
+		Graphics graphicOrig = compImg.getGraphics();
+		// creo una nuova immagine
+		imagetmp = new BufferedImage((int)Wi, (int)Hi, BufferedImage.TYPE_INT_RGB);
+		
+		Graphics g = imagetmp.getGraphics();
+	    g.setColor(compImg.getForeground());
+	    g.setFont(compImg.getFont());
+	    compImg.paintAll(g);
+	}
     int[][] imageOrigR = new int[Hi][Wi];
     int[][] imageOrigG = new int[Hi][Wi];
     int[][] imageOrigB = new int[Hi][Wi];
+    
+    double[][] ImgBN = new double[Hi][Wi];
     
     double[][] GIX = new double[Hi][Wi];
     double[][] GIY = new double[Hi][Wi];
@@ -4292,8 +4308,8 @@ private void CannyEdgeDetect(){
     
     double[][] angle = new double[Hi][Wi];
     
-    for(int i=1;(i<(Hi-1));i++){
-		for(int j=1;j<(Wi-1);j++){
+    for(int i=0;(i<(Hi));i++){
+		for(int j=0;j<(Wi);j++){
 			img_color = new Color(imagetmp.getRGB(j,i));
 			imageOrigR[i][j] = img_color.getRed();
 			imageOrigG[i][j] = img_color.getGreen();
@@ -4303,6 +4319,11 @@ private void CannyEdgeDetect(){
 			GASS[i][j]=0;
 			angle[i][j]=0;
 			F[i][j] = imageOrigR[i][j];
+			
+			if(imageType!=3 && imageOrigR[i][j]!=imageOrigG[i][j] || imageOrigR[i][j]!=imageOrigB[i][j]){
+				imageType=3;
+				break;
+			}
 		}
 	}
     
@@ -4330,6 +4351,31 @@ private void CannyEdgeDetect(){
     double h2 = h*h*2;
     double N=0,Ftmp=0;
     double GXt=0,GYt=0;
+    
+    
+    if(imageType==3) {
+   	 
+   	 for(int i=0;(i<(Hi));i++){
+   		for(int j=0;j<(Wi);j++){
+	   			img_color = new Color(imagetmp.getRGB(j,i));
+	   			ImgBN[i][j]= (0.2126 * img_color.getRed()+0.7152 * img_color.getGreen()+ 0.0722 * img_color.getBlue());
+	   			/*if(ImgBN[i][j]<=0.0031308)
+	   				ImgBN[i][j]= 12.92 * ImgBN[i][j];
+	   			else
+	   				ImgBN[i][j]= 1.055 * Math.pow(ImgBN[i][j],1.0/2.4) - 0.055;
+	   			*/
+	   			F[i][j]=ImgBN[i][j];
+	   		}
+	   	}
+	}
+    else {
+		for(int i=0;(i<(Hi));i++){
+    		for(int j=0;j<(Wi);j++){
+    			ImgBN[i][j]=imageOrigR[i][j];
+    		}
+	    }    		 
+	 }
+    
     //**********************************************
     // calcolo gradienti con sobel per ora solo B/N
     //**********************************************
@@ -4338,8 +4384,8 @@ private void CannyEdgeDetect(){
 			GXt=GYt=0;
 			for(int ii=-1; ii<2;ii++) {
 		    	for(int jj=-1;jj<2;jj++) {
-		    		GXt = GXt + GX[ii+1][jj+1]*imageOrigR[i+ii][j+jj];
-		    		GYt = GYt + GY[ii+1][jj+1]*imageOrigR[i+ii][j+jj];
+		    		GXt = GXt + GX[ii+1][jj+1]*ImgBN[i+ii][j+jj];
+		    		GYt = GYt + GY[ii+1][jj+1]*ImgBN[i+ii][j+jj];
 		    	}
 		    }
 			GIX[i][j]=GXt;
@@ -4374,7 +4420,7 @@ private void CannyEdgeDetect(){
 		}
 	}
     
-    imagetmp = new BufferedImage((int)Wi, (int)Hi, BufferedImage.TYPE_INT_RGB);
+    BufferedImage imagetmp1 = new BufferedImage((int)Wi, (int)Hi, BufferedImage.TYPE_INT_RGB);
     for(int i=1;(i<(Hi-1));i++){
 		for(int j=1;j<(Wi-1);j++){
 			N=0;
@@ -4396,23 +4442,23 @@ private void CannyEdgeDetect(){
 		    if(col<0)
 		    	col=0;
 		    img_color = new Color(col,col,col);
-			imagetmp.setRGB(j, i, img_color.getRGB());
-			imageOrigR[i][j]=col;
+			imagetmp1.setRGB(j, i, img_color.getRGB());
+			ImgBN[i][j]=col;
 		}
 	}
     
     // creo una nuova immagine
  	//imagetmp = new BufferedImage((int)Wi, (int)Hi, BufferedImage.TYPE_INT_RGB);
- 	addImage(imagetmp,"canny_edge_detect_img_out_total");
+ 	addImage(imagetmp1,"canny_edge_detect_img_out_total");
     
- 	imagetmp = new BufferedImage((int)Wi, (int)Hi, BufferedImage.TYPE_INT_RGB);
+ 	BufferedImage imagetmp12 = new BufferedImage((int)Wi, (int)Hi, BufferedImage.TYPE_INT_RGB);
  	for(int i=1;(i<(Hi-1));i++){
 		for(int j=1;j<(Wi-1);j++){
 			GXt=GYt=0;
 			for(int ii=-1; ii<2;ii++) {
 		    	for(int jj=-1;jj<2;jj++) {
-		    		/*GXt = GXt + GX[jj+1][ii+1]*imageOrigR[j+jj][i+ii];
-		    		GYt = GYt + GY[jj+1][ii+1]*imageOrigR[j+jj][i+ii];*/
+		    		/*GXt = GXt + GX[jj+1][ii+1]*ImgBN[j+jj][i+ii];
+		    		GYt = GYt + GY[jj+1][ii+1]*ImgBN[j+jj][i+ii];*/
 		    		GXt = GXt + GX[ii+1][jj+1]*F[i+ii][j+jj];
 		    		GYt = GYt + GY[ii+1][jj+1]*F[i+ii][j+jj];
 		    	}
@@ -4435,10 +4481,10 @@ private void CannyEdgeDetect(){
 		    if(col<0)
 		    	col=0;
 		    img_color = new Color(col,col,col);
-			imagetmp.setRGB(j, i, img_color.getRGB());
+			imagetmp12.setRGB(j, i, img_color.getRGB());
 		}
 	}
-    addImage(imagetmp,"canny_edge_detect_img_out_gradient");
+    addImage(imagetmp12,"canny_edge_detect_img_out_gradient");
     BufferedImage imagetmp2 = new BufferedImage((int)Wi, (int)Hi, BufferedImage.TYPE_INT_RGB);
     //*****************************************
     //* ANGOLO
@@ -4446,6 +4492,9 @@ private void CannyEdgeDetect(){
     for(int i=1;(i<(Hi-1));i++){
 		for(int j=1;j<(Wi-1);j++){
 			//if(Math.abs(GIY[i][j])>0 && Math.abs(GIX[i][j])>0) {
+			//***************************************************
+			//* attenzione l'asse Y è invertito gli angoli che sembrano del primo quadrante vanno nel  quarto
+			//****************************************************
 				angle[i][j] = Math.atan(GIY[i][j]/GIX[i][j]);
 				//F[i][j] = (int)Math.round((Math.pow(GIX[i][j],2) + Math.pow(GIY[i][j],2)));
 				if(Math.abs(angle[i][j])>(3*Math.PI/8)) {
@@ -4480,26 +4529,29 @@ private void CannyEdgeDetect(){
     double GASSMax=0;
     for(int i=1;(i<(Hi-1));i++){
 		for(int j=1;j<(Wi-1);j++){
-			//F[i][j] = (int)Math.round((Math.pow(GIX[i][j],2) + Math.pow(GIY[i][j],2)));
-			if(Math.abs(angle[i][j]-Math.PI/2)<Utility.EPS5) {
+			
+			if(jpos==j && ipos==i)
+				jpos=j;
+			
+			if(angle[i][j]==Math.PI/2) {
 				if(G[i][j]<G[i-1][j] || G[i][j]<G[i+1][j])
 					GASS[i][j]=0;
 				else
 					GASS[i][j]=G[i][j];
 			}
-			else if(Math.abs(angle[i][j])<Utility.EPS5) {
+			else if(angle[i][j]==0) {
 				if(G[i][j]<G[i][j-1]|| G[i][j]<G[i][j+1])
 					GASS[i][j]=0;
 				else
 					GASS[i][j]=G[i][j];
 			}
-			else if(Math.abs(angle[i][j]-Math.PI/4)<Utility.EPS5) {
+			else if(angle[i][j]==-Math.PI/4) {
 				if(G[i][j]<G[i+1][j-1] || G[i][j]<G[i-1][j+1])
 					GASS[i][j]=0;
 				else
 					GASS[i][j]=G[i][j];
 			}
-			else if(Math.abs(angle[i][j]+Math.PI/4)<Utility.EPS5) {
+			else if(angle[i][j]==Math.PI/4) {
 				if(G[i][j]<G[i-1][j-1] || G[i][j]<G[i+1][j+1])
 					GASS[i][j]=0;
 				else
@@ -4534,8 +4586,42 @@ private void CannyEdgeDetect(){
 				/*for(int ii=-1; ii<2;ii++) {
 			    	for(int jj=-1;jj<2;jj++) {
 			    		if((GASS[i+ii][j+jj]/GASSMax)>=0.05) {
-			    			bbreak=true;
-			    			break;
+			    			if(ii==0 && angle[i][j]==Math.PI/2) {
+			    				bbreak=true;
+			    				break;
+			    			}
+			    			else if(jj==0 && angle[i][j]==0) {
+			    				bbreak=true;
+			    				break;
+			    			}
+			    			else if(((jj==-1 && ii==1) || (jj==1 && ii==-1)) && angle[i][j]==Math.PI/4) {
+			    				bbreak=true;
+			    				break;
+			    			}
+			    			else if(((jj==1 && ii==1) || (jj==-1 && ii==-1)) && angle[i][j]==-Math.PI/4) {
+			    				bbreak=true;
+			    				break;
+			    			}
+//			    			if(angle[i][j]==Math.PI/2 && (angle[i+ii][j+jj]==Math.PI/4 || angle[i+ii][j+jj]==-Math.PI/4)) {
+//			    				bbreak=true;
+//			    				break;
+//			    			}
+//			    			else if(angle[i][j]==Math.PI/4 && angle[i+ii][j+jj]>=0) {
+//			    				bbreak=true;
+//			    				break;
+//			    			}
+//			    			else if(angle[i][j]==0 && (angle[i+ii][j+jj]>=-Math.PI/4 && angle[i+ii][j+jj]<=Math.PI/4)) {
+//			    				bbreak=true;
+//			    				break;
+//			    			}
+//			    			else if(angle[i][j]==-Math.PI/4 && (angle[i+ii][j+jj]<=0 || angle[i+ii][j+jj]==Math.PI/2)) {
+//			    				bbreak=true;
+//			    				break;
+//			    			}
+//			    			if(angle[i][j]==angle[i+ii][j+jj]) {
+//			    				bbreak=true;
+//			    				break;
+//			    			}
 			    		}
 			    	}
 			    	if(bbreak) {

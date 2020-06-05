@@ -109,6 +109,13 @@ public class Snakes extends JPanelControlPointBase{
 	    	int imageType=1;
 	    	 double[][] gauFilter = new double[5][5];
 	    	 
+	    	 double sigma=4;
+	    	 for(int ii=-2; ii<3;ii++) {
+		    	for(int jj=-2;jj<3;jj++) {
+		    		gauFilter[ii+2][jj+2] = 1*(Math.exp((-1)*(Math.pow(ii,2)+Math.pow(jj,2))/2*sigma*sigma))/(2*sigma*sigma*Math.PI);
+		    	}
+		    }
+	    	 
 	    	 gauFilter[0][0]=2;
 	    	 gauFilter[0][1]=4;
 	    	 gauFilter[0][2]=5;
@@ -138,12 +145,7 @@ public class Snakes extends JPanelControlPointBase{
 	    	 gauFilter[4][2]=5;
 	    	 gauFilter[4][3]=4;
 	    	 gauFilter[4][4]=2;
-	    	 double sigma=2;
-	    	 for(int ii=-2; ii<3;ii++) {
-		    	for(int jj=-2;jj<3;jj++) {
-		    		gauFilter[ii+2][jj+2] = 1*(Math.exp((-1)*(Math.pow(ii,2)+Math.pow(jj,2))/2*sigma*sigma))/(2*sigma*sigma*Math.PI);
-		    	}
-		    }
+	    	 
 	    	 
 	    	 double[][] sobelFilter = new double[5][5];
 	    	 sobelFilter[0][0]=0;
@@ -198,6 +200,34 @@ public class Snakes extends JPanelControlPointBase{
 	    	 double[][] gradEedgeX = new double[Hi][Wi];
 	    	 double[][] gradEedgeY = new double[Hi][Wi];
 	    	 
+	    	 double[][] GX = new double[3][3];
+	    	 double[][] GY = new double[3][3];
+	    	 double[][] GIX = new double[Hi][Wi];
+    	    double[][] GIY = new double[Hi][Wi];
+    	    double[][] F = new double[Hi][Wi];
+    	    double[][] G = new double[Hi][Wi];
+    	    double[][] GASS = new double[Hi][Wi];
+	    	 
+	    	GX[0][0] = 1;
+    	    GX[0][1] = 0;
+    	    GX[0][2] = -1;
+    	    GX[1][0] = 1;
+    	    GX[1][1] = 0;
+    	    GX[1][2] = -1;
+    	    GX[2][0] = 1;
+    	    GX[2][1] = 0;
+    	    GX[2][2] = -1;
+    	    
+    	    GY[0][0] = 1;
+    	    GY[0][1] = 1;
+    	    GY[0][2] = 1;
+    	    GY[1][0] = 0;
+    	    GY[1][1] = 0;
+    	    GY[1][2] = 0;
+    	    GY[2][0] = -1;
+    	    GY[2][1] = -1;
+    	    GY[2][2] = -1;
+	    	 
 	    	 Color img_color;
 	    	 
 	    	 for(int i=1;(i<(Hi-1));i++){
@@ -221,10 +251,10 @@ public class Snakes extends JPanelControlPointBase{
 		    		for(int j=1;j<(Wi-1);j++){
 		    			img_color = new Color(imgBuf.getRGB(j,i));
 		    			ImgBN[i][j]= (0.2126 * img_color.getRed()+0.7152 * img_color.getGreen()+ 0.0722 * img_color.getBlue());
-		    			if(ImgBN[i][j]<=0.0031308)
+		    			/*if(ImgBN[i][j]<=0.0031308)
 		    				ImgBN[i][j]= 12.92 * ImgBN[i][j];
 		    			else
-		    				ImgBN[i][j]= 1.055 * Math.pow(ImgBN[i][j],1.0/2.4) - 0.055;
+		    				ImgBN[i][j]= 1.055 * Math.pow(ImgBN[i][j],1.0/2.4) - 0.055;*/
 		    		}
 		    	 }
 	    	 }
@@ -298,19 +328,58 @@ public class Snakes extends JPanelControlPointBase{
     				//Eedge[i][j]= -GXt*GXt;
     				//Eedge[i][j]= -GYt*GYt; 
     				Eedge[i][j]= GYt;
-    				//Eedge[i][j]= GYt;
+    				//Eedge[i][j]= GXt;
     				if(Eedge[i][j]<Edgemin)
     					Edgemin=Eedge[i][j];
     			}
 	    	}
+	    	//*******************************************************
+	    	//** da CANNY EDGE
+	    	//********************************************************
+	    	for(int i=1;(i<(Hi-1));i++){
+				for(int j=1;j<(Wi-1);j++){
+					GXt=GYt=0;
+					for(int ii=-1; ii<2;ii++) {
+				    	for(int jj=-1;jj<2;jj++) {
+				    		GXt = GXt + GX[jj+1][ii+1]*ImgBN[i+ii][j+jj];
+				    		GYt = GYt + GY[jj+1][ii+1]*ImgBN[i+ii][j+jj];
+				    		/*GXt = GXt + GX[ii+1][jj+1]*F[i+ii][j+jj];
+				    		GYt = GYt + GY[ii+1][jj+1]*F[i+ii][j+jj];*/
+				    	}
+				    }
+					GIX[i][j]=GXt;
+					GIY[i][j]=GYt;
+				}
+			}
+ 	
+		 	//*****************************************************
+		    // metto il gradinte al quadrato per essere filtrato
+		    //*****************************************************
+		    for(int i=1;(i<(Hi-1));i++){
+				for(int j=1;j<(Wi-1);j++){
+					G[i][j] = Math.sqrt(Math.pow(GIX[i][j],2) + Math.pow(GIY[i][j],2));
+					//F[i][j] = (int)Math.round((Math.pow(GIX[i][j],2) + Math.pow(GIY[i][j],2)));
+					/*int col = (int) Math.round(G[i][j]);
+				    if(col>255)
+				    	col=255;
+				    if(col<0)
+				    	col=0;
+				    img_color = new Color(col,col,col);
+					imagetmp12.setRGB(j, i, img_color.getRGB());*/
+				}
+			}
+	    	
+	    	
 	    	Edgemin=0;
 	    	for(int i=2;(i<(Hi-2));i++){
     			for(int j=2;j<(Wi-2);j++){	
     				GXt=GYt=0;
     				for(int ii=-2; ii<3;ii++) {
     			    	for(int jj=-2;jj<3;jj++) {
-    			    		GXt = GXt + gauFilter[ii+2][jj+2]*Eedge[i+ii][j+jj];
+    			    		//GXt = GXt + gauFilter[ii+2][jj+2]*Eedge[i+ii][j+jj];
     			    		//GYt = GYt + sobelFilter[ii+2][jj+2]*ImgBN[i+ii][j+jj];
+    			    		GXt = GXt + gauFilter[ii+2][jj+2]*G[i+ii][j+jj];
+    			    		//GXt = GXt + G[i+ii][j+jj]/25;
     			    	}
     			    }
     				EedgeG[i][j]= -GXt*GXt;
@@ -359,7 +428,7 @@ public class Snakes extends JPanelControlPointBase{
 	    	
 	    	
 	    	snakePoints = new ArrayList<Point2D>();
-	    	int step=0,numInter=5;
+	    	int step=0,numInter=10;
 	    	FourPointInt ctrlPoint0=null;
 	    	double hx=0,hy=0;
 	    	ArrayList<FourPointInt> listCtrlPoin = getControlPoint();
@@ -430,7 +499,7 @@ public class Snakes extends JPanelControlPointBase{
 		    		double h1 = (Math.pow(ps.getX()-ps1.getX(), 2) + Math.pow(ps.getY()-ps1.getY(), 2));
 		    		double h0 = (Math.pow(ps.getX()-ps_1.getX(), 2) + Math.pow(ps.getY()-ps_1.getY(), 2));
 		    		double h= Math.max(h0, h1);
-		    		int hmin= (int)Math.ceil(Math.min(h0, h1)/2);
+		    		int hmin= (int)Math.floor(Math.min(h0, h1)/2);
 		    		if(hmin>3) {
 		    			hmin=3;
 		    		}

@@ -24,6 +24,7 @@ import paintimage.PaintImage;
 import utility.FourPointInt;
 //import paintimage.PaintImage.MenuItemListener;
 import utility.ImageU;
+import utility.Utility;
 
 public class Snakes extends JPanelControlPointBase{
 	JPopupMenu popupMenu = null;
@@ -451,15 +452,71 @@ public class Snakes extends JPanelControlPointBase{
 	    	}
 	    	
 	    	ArrayList<Point2D> snakePointsTmp = new ArrayList<Point2D>();
-	    	int x,y,stepSnakes=30,intStep=0,snakeSize=snakePoints.size();
+	    	int x,y,stepSnakes=1,intStep=0,snakeSize=snakePoints.size();
 	    	double gamm=1,wint=1,alp=1,bet=1,xs1,ys1;
 	    	double E,Emin,percMov=0;
 	    	int xxmin=0,yymin=0,numMod=0;
 	    	Point2D ps1,ps_1,ps2,ps_2;
-	    	for(int is=0;is<stepSnakes;is++) {
+	    	int snakeDim = snakePoints.size();
+	    	double minDeltaX=0,minDeltaY=0;
+	    	double[][] A = new double[snakeDim][snakeDim];
+	    	double[][] Ainv = new double[snakeDim][snakeDim];
+	    	double[] Bx = new double[snakeDim];
+	    	double[] By = new double[snakeDim];
+	    	double[] Xt = new double[snakeDim];
+	    	double[] Yt = new double[snakeDim];
+	    	for(int isn=0;isn<stepSnakes;isn++) {
 	    		intStep=0;
 	    		numMod=0;
-		    	for(Point2D ps : snakePoints) {
+	    		for(int is=0;is<snakeDim;is++) {
+	    			Point2D ps = snakePoints.get(is);
+	    			x=(int)Math.round(ps.getX());
+		    		y=(int)Math.round(ps.getY());
+	    			Bx[is]=ps.getX() /*- gradEedgeX[y][x]*/;
+	    			By[is]=ps.getY() /*- gradEedgeY[y][x]*/;
+	    			for(int js=0;js<snakeDim;js++) {
+	    				//if(is-js-2>=0 && is-js-2<=snakeDim) {
+	    					if(is-js-2==0)
+	    						A[is][js]=bet;
+	    					else if(is-js-1==0)
+	    						A[is][js]=-alp-4*bet;
+		    				else if(js-is==0)
+	    						A[is][js]=2*alp+6*bet+gamm;
+		    				else if(is-js+1==0)
+		    					A[is][js]=-alp-4*bet;
+		    				else if(is-js+2==0)
+		    					A[is][js]=bet;
+		    				else
+		    					A[is][js]=0;
+	    				//}
+	    				//A[is][js]=0;
+	    			}
+	    		}
+	    		Ainv = Utility.matrixInverse(A);
+	    		Xt = Utility.matrixMultVect(Ainv, Bx);
+	    		Yt = Utility.matrixMultVect(Ainv, By);
+	    		
+	    		for(Point2D ps : snakePoints) {
+	    			xs1=Xt[intStep];
+	    			ys1=Yt[intStep];
+		    		
+		    		ps.setLocation(xs1,ys1);
+		    				    		
+		    		//numMod++;
+		    				    		
+		    		//percMov = ((double)numMod)/snakePoints.size();
+		    				    		
+		    		if(Math.abs(xs1-Bx[intStep])<minDeltaX) {
+		    			minDeltaX=Math.abs(Xt[intStep]-Bx[intStep]);
+		    		}
+		    		if(Math.abs(ys1-By[intStep])<minDeltaY) {
+		    			minDeltaY=Math.abs(Yt[intStep]-By[intStep]);
+		    		}
+		    		
+		    		intStep++;
+	    		}
+	    		
+		    	/*for(Point2D ps : snakePoints) {
 		    		ps_2=ps_1=ps1=ps2=ps;
 		    		if(intStep==0) {
 		    			//ps_2=snakePoints.get(snakeSize-2);
@@ -496,6 +553,7 @@ public class Snakes extends JPanelControlPointBase{
 		    			//ps2=snakePoints.get(1);
 		    			
 		    		}
+		    		
 		    		double h1 = (Math.pow(ps.getX()-ps1.getX(), 2) + Math.pow(ps.getY()-ps1.getY(), 2));
 		    		double h0 = (Math.pow(ps.getX()-ps_1.getX(), 2) + Math.pow(ps.getY()-ps_1.getY(), 2));
 		    		double h= Math.max(h0, h1);
@@ -537,7 +595,7 @@ public class Snakes extends JPanelControlPointBase{
 		    		}
 		    		percMov = ((double)numMod)/snakePoints.size();
 		    		intStep++;
-		    	}
+		    	}*/
 		    	int ind=0;
 		    	/*for(Point2D ps : snakePoints) {
 		    		ps.setLocation(snakePointsTmp.get(ind));

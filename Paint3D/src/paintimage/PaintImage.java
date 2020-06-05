@@ -1,6 +1,7 @@
 package paintimage;
 
 //**************************************************************************
+//**  git pull https://github.com/alexargonet/Projects.git
 //**  git push https://github.com/alexargonet/Projects.git HEAD:master
 //**************************************************************************
 

@@ -4,8 +4,11 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.LinkedHashMap;
 
+import org.apache.commons.math3.linear.*;
+
 import objectBase.ObjectBase;
 import paintimage.PointResEqua;
+//import sun.security.util.ArrayUtil;
 
 public class Utility {
 	public static final double EPS= 1E-5;
@@ -563,6 +566,18 @@ public class Utility {
     			return objtmp;
     	}
 		return null;
+	}
+	
+	public static double[][] matrixInverse(double[][] a) {
+		RealMatrix Arm = MatrixUtils.createRealMatrix(a);
+	    LUDecomposition decomposition = new LUDecomposition(Arm);
+	    return decomposition.getSolver().getInverse().getData();
+	}
+	
+	public static double[] matrixMultVect(double[][] a,double[] b) {
+		RealMatrix Arm = MatrixUtils.createRealMatrix(a);
+		RealMatrix Brm = MatrixUtils.createColumnRealMatrix(b);
+	    return Arm.multiply(Brm).getColumn(0);
 	}
 
 }

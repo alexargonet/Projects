@@ -110,12 +110,7 @@ public class Snakes extends JPanelControlPointBase{
 	    	int imageType=1;
 	    	 double[][] gauFilter = new double[5][5];
 	    	 
-	    	 double sigma=4;
-	    	 for(int ii=-2; ii<3;ii++) {
-		    	for(int jj=-2;jj<3;jj++) {
-		    		gauFilter[ii+2][jj+2] = 1*(Math.exp((-1)*(Math.pow(ii,2)+Math.pow(jj,2))/2*sigma*sigma))/(2*sigma*sigma*Math.PI);
-		    	}
-		    }
+	    	 
 	    	 
 	    	 gauFilter[0][0]=2;
 	    	 gauFilter[0][1]=4;
@@ -146,6 +141,13 @@ public class Snakes extends JPanelControlPointBase{
 	    	 gauFilter[4][2]=5;
 	    	 gauFilter[4][3]=4;
 	    	 gauFilter[4][4]=2;
+	    	 
+	    	 double sigma=4;
+	    	 for(int ii=-2; ii<3;ii++) {
+		    	for(int jj=-2;jj<3;jj++) {
+		    		gauFilter[ii+2][jj+2] = 1*(Math.exp((-1)*(Math.pow(ii,2)+Math.pow(jj,2))/2*sigma*sigma))/(2*sigma*sigma*Math.PI);
+		    	}
+		    }
 	    	 
 	    	 
 	    	 double[][] sobelFilter = new double[5][5];
@@ -359,6 +361,8 @@ public class Snakes extends JPanelControlPointBase{
 		    for(int i=1;(i<(Hi-1));i++){
 				for(int j=1;j<(Wi-1);j++){
 					G[i][j] = Math.sqrt(Math.pow(GIX[i][j],2) + Math.pow(GIY[i][j],2));
+					//G[i][j] = Math.sqrt(Math.pow(gradIX[i][j],2) + Math.pow(gradIY[i][j],2));
+					
 					//F[i][j] = (int)Math.round((Math.pow(GIX[i][j],2) + Math.pow(GIY[i][j],2)));
 					/*int col = (int) Math.round(G[i][j]);
 				    if(col>255)
@@ -395,8 +399,8 @@ public class Snakes extends JPanelControlPointBase{
 	    	
 	    	for(int i=1;(i<(Hi-2));i++){
     			for(int j=1;j<(Wi-2);j++){	
-    				gradEedgeX[i][j]=Eedge[i][j+1]-Eedge[i][j];
-    				gradEedgeY[i][j]=Eedge[i+1][j]-Eedge[i][j];  
+    				gradEedgeX[i][j]=EedgeG[i][j]-EedgeG[i][j-1];
+    				gradEedgeY[i][j]=EedgeG[i][j]-EedgeG[i-1][j];  
     				
     				
     				/*if(gradEedgeX[i][j]>255) {
@@ -452,7 +456,7 @@ public class Snakes extends JPanelControlPointBase{
 	    	}
 	    	
 	    	ArrayList<Point2D> snakePointsTmp = new ArrayList<Point2D>();
-	    	int x,y,stepSnakes=1,intStep=0,snakeSize=snakePoints.size();
+	    	int x,y,stepSnakes=20,intStep=0,snakeSize=snakePoints.size();
 	    	double gamm=1,wint=1,alp=1,bet=1,xs1,ys1;
 	    	double E,Emin,percMov=0;
 	    	int xxmin=0,yymin=0,numMod=0;
@@ -465,6 +469,18 @@ public class Snakes extends JPanelControlPointBase{
 	    	double[] By = new double[snakeDim];
 	    	double[] Xt = new double[snakeDim];
 	    	double[] Yt = new double[snakeDim];
+	    	double[] Arow = new double[snakeDim];
+	    	double[] Atmp =null;
+	    	for(int is=0;is<snakeDim;is++) {
+	    		Arow[is]=0;
+	    		//Atmp[is]=0;
+	    	}
+	    	Arow[0]=bet;
+	    	Arow[1]=-alp-4*bet;
+	    	Arow[2]=2*alp+6*bet+gamm;
+	    	Arow[3]=-alp-4*bet;
+	    	Arow[4]=bet;
+	    	//for(int is=0;is<snakeDim;is++) {
 	    	for(int isn=0;isn<stepSnakes;isn++) {
 	    		intStep=0;
 	    		numMod=0;
@@ -472,26 +488,30 @@ public class Snakes extends JPanelControlPointBase{
 	    			Point2D ps = snakePoints.get(is);
 	    			x=(int)Math.round(ps.getX());
 		    		y=(int)Math.round(ps.getY());
-	    			Bx[is]=ps.getX() /*- gradEedgeX[y][x]*/;
-	    			By[is]=ps.getY() /*- gradEedgeY[y][x]*/;
+	    			Bx[is]=ps.getX() - gradEedgeX[y][x];
+	    			By[is]=ps.getY() - gradEedgeY[y][x];
+	    			Atmp=Utility.shift_array(Arow, is-2);
 	    			for(int js=0;js<snakeDim;js++) {
-	    				//if(is-js-2>=0 && is-js-2<=snakeDim) {
-	    					if(is-js-2==0)
-	    						A[is][js]=bet;
-	    					else if(is-js-1==0)
-	    						A[is][js]=-alp-4*bet;
-		    				else if(js-is==0)
-	    						A[is][js]=2*alp+6*bet+gamm;
-		    				else if(is-js+1==0)
-		    					A[is][js]=-alp-4*bet;
-		    				else if(is-js+2==0)
-		    					A[is][js]=bet;
-		    				else
-		    					A[is][js]=0;
-	    				//}
-	    				//A[is][js]=0;
+    					/*if(is-js-2==0)
+    						A[is][js]=bet;
+    					else if(is-js-1==0)
+    						A[is][js]=-alp-4*bet;
+	    				else if(js-is==0)
+    						A[is][js]=2*alp+6*bet+gamm;
+	    				else if(is-js+1==0)
+	    					A[is][js]=-alp-4*bet;
+	    				else if(is-js+2==0)
+	    					A[is][js]=bet;
+	    				else
+	    					A[is][js]=0;*/
+	    				A[is][js]=Atmp[js];
+	    				
 	    			}
 	    		}
+	    		/*A[0][snakeDim-2]=A[0][snakeDim-1]=0;
+	    		A[0][snakeDim-1]=0;
+	    		A[snakeDim-2][0]=A[snakeDim-2][1]=0;
+	    		A[snakeDim-1][0]=0;*/
 	    		Ainv = Utility.matrixInverse(A);
 	    		Xt = Utility.matrixMultVect(Ainv, Bx);
 	    		Yt = Utility.matrixMultVect(Ainv, By);

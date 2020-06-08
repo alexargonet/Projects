@@ -567,7 +567,9 @@ public class Utility {
     	}
 		return null;
 	}
-	
+	//********************************************************
+	//* MATRICI
+	//********************************************************
 	public static double[][] matrixInverse(double[][] a) {
 		RealMatrix Arm = MatrixUtils.createRealMatrix(a);
 	    LUDecomposition decomposition = new LUDecomposition(Arm);
@@ -579,5 +581,36 @@ public class Utility {
 		RealMatrix Brm = MatrixUtils.createColumnRealMatrix(b);
 	    return Arm.multiply(Brm).getColumn(0);
 	}
+	//*********************************************************
+	//* SHIFT VETTORE
+	//*********************************************************
+	
+	public static double[]  shift_array(double[] A, int n) {
+	    int N = A.length;
+	    double[] B = new double[N];
+	    n %= N;
+	    if(n < 0)
+	        n = N + n;
+	    int d = gcd(N, n);
+	    for(int i = 0; i < d; i++) {
+	        double temp = A[i];
+	        if(n>0) {
+		        for(int j = i - n + N; j != i; j = (j - n + N) % N)
+		            B[(j + n) % N] = A[j];
+		        }
+	        B[(i + n) % N] = temp;
+	    }
+	    return B;
+	}
+	
+	private static int gcd(int a, int b) {
+	    while(b != 0) {
+	        int c = a;
+	        a = b;
+	        b = c % a;
+	    }
+	    return a;
+	}
+	//**************************************************************
 
 }

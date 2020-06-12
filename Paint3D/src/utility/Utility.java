@@ -612,5 +612,38 @@ public class Utility {
 	    return a;
 	}
 	//**************************************************************
-
+	//* FILTERING
+	//**************************************************************
+	
+	public static double[][] filter(double[][] Kernel,double[][] matrix,int Hi,int Wi,int dimKernel) {
+		double[][] G = new double[Hi][Wi];
+		double Gtmp = 0;
+		int dimMath=(int)Math.ceil(dimKernel/2);
+		int ind=0,jnd=0;
+    	for(int i=0;i<(Hi);i++){
+			for(int j=0;j<(Wi);j++){	
+				Gtmp=0;
+				for(int ii=-(dimMath); ii<=dimMath;ii++) {
+	    		    	for(int jj=-(dimMath);jj<=dimMath;jj++) {
+				    		if(i-ii>=0 && i-ii<Hi && j-jj>=0 && j-jj<Wi) {	    			
+				    			Gtmp = Gtmp + Kernel[ii+(dimMath)][jj+(dimMath)]*matrix[i-ii][j-jj];
+				    		}
+				    		else{
+				    			if(i-ii<0)
+				    				ind=0;
+				    			if(i-ii>=Hi)
+				    				ind=Hi-1;
+				    			if(j-jj<0)
+				    				jnd=0;
+				    			if(j-jj>=Wi)
+				    				jnd=Wi-1;
+				    			Gtmp = Gtmp + Kernel[ii+(dimMath)][jj+(dimMath)]*matrix[ind][jnd];
+				    		}
+			    		}
+			    	}
+	    		G[i][j]= Gtmp;
+			}
+    	}
+    	return G;
+	}
 }

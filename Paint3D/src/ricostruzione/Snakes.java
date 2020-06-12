@@ -3,7 +3,6 @@ package ricostruzione;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.RenderingHints;
 import java.awt.Stroke;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -144,37 +143,117 @@ public class Snakes extends JPanelControlPointBase{
 	    	 
 	    	 double Nwei=0;
 	    	 double wint=1;
-<<<<<<< HEAD
 	    	 //double sigma=0.84089642;
-	    	 double sigma=4.0;
+	    	 double sigma=4;
 	    	 double expn=0;
-	    	 double signm2 = sigma*sigma*2;
+	    	 double signmq = sigma*sigma;
+	    	 double signmq4 = signmq*signmq;
+	    	 double signm2 = signmq*2;
 	    	 double signm2pi = signm2*Math.PI;
-=======
-	    	 double sigma=2;
->>>>>>> b699056fc9aa414c13ffa6d023b17955da6c764d
 	    	 int dimMat=(int)Math.ceil(6*sigma);
 	    	 if(dimMat%2==0)
 	    		 dimMat++;
 	    	 int dimMath=(int)Math.ceil(dimMat/2);
-	    	 double[][] gauFilterD = new double[dimMat][dimMat];
+	    	 double[][] GAU = new double[dimMat][dimMat];
 	    	 for(int ii=-(dimMath); ii<=dimMath;ii++) {
 		    	for(int jj=-(dimMath);jj<=dimMath;jj++) {
-<<<<<<< HEAD
 		    		expn = -(Math.pow(ii,2)+Math.pow(jj,2))/signm2;
-		    		gauFilterD[ii+(dimMath)][jj+(dimMath)] = /*sigma*Math.sqrt(2*Math.PI)**/(Math.exp(expn))/signm2pi;
+		    		GAU[ii+(dimMath)][jj+(dimMath)] = /*sigma*Math.sqrt(2*Math.PI)**/(Math.exp(expn))/signm2pi;
 		    		//gauFilterD[ii+(dimMath)][jj+(dimMath)] = 1;
-		    		Nwei=Nwei+gauFilterD[ii+(dimMath)][jj+(dimMath)];
+		    		Nwei=Nwei+GAU[ii+(dimMath)][jj+(dimMath)];
 		    	}
 		     }
 	    	 
 	    	 for(int ii=-(dimMath); ii<=dimMath;ii++) {
 		    	for(int jj=-(dimMath);jj<=dimMath;jj++) {
-		    		gauFilterD[ii+(dimMath)][jj+(dimMath)] /= Nwei;
+		    		GAU[ii+(dimMath)][jj+(dimMath)] /= Nwei;
 		    		
-=======
-		    		gauFilterD[ii+(dimMath)][jj+(dimMath)] = (Math.exp((-1)*(Math.pow(ii,2)+Math.pow(jj,2))/2*sigma*sigma))/(2*sigma*sigma*Math.PI);
->>>>>>> b699056fc9aa414c13ffa6d023b17955da6c764d
+		    	}
+		     }
+	    	 //**********************************************
+	    	 //* GRADIENT OF GAUSSIAN
+	    	 //**********************************************
+	    	 double[][] GRoG = new double[dimMat][dimMat];
+	    	 double Nweig=0;
+	    	 double amp=0;
+	    	 for(int ii=-(dimMath); ii<=dimMath;ii++) {
+		    	for(int jj=-(dimMath);jj<=dimMath;jj++) {
+		    		expn = -(Math.pow(ii,2)+Math.pow(jj,2))/signm2;
+		    		amp = -(jj+ii)/(signm2pi*signm2);
+		    		GRoG[ii+(dimMath)][jj+(dimMath)] = amp*(Math.exp(expn));
+		    		//gauFilterD[ii+(dimMath)][jj+(dimMath)] = 1;
+		    		Nweig=Nweig+GRoG[ii+(dimMath)][jj+(dimMath)];
+		    	}
+		     }
+	    	 
+	    	 for(int ii=-(dimMath); ii<=dimMath;ii++) {
+		    	for(int jj=-(dimMath);jj<=dimMath;jj++) {
+		    		GRoG[ii+(dimMath)][jj+(dimMath)] /= Nweig;
+		    		
+		    	}
+		     }
+	    	 
+	    	 
+	    	 double[][] GRoGX = new double[dimMat][dimMat];
+	    	 amp=0;
+	    	 double Nweix=0,Nweiy=0;
+	    	 for(int ii=-(dimMath); ii<=dimMath;ii++) {
+		    	for(int jj=-(dimMath);jj<=dimMath;jj++) {
+		    		expn = -(Math.pow(ii,2)+Math.pow(jj,2))/signm2;
+		    		amp = -(jj)/(signm2pi*signm2);
+		    		GRoGX[ii+(dimMath)][jj+(dimMath)] = amp*(Math.exp(expn));
+		    		//gauFilterD[ii+(dimMath)][jj+(dimMath)] = 1;
+		    		Nweix=Nweix+GRoGX[ii+(dimMath)][jj+(dimMath)];
+		    	}
+		     }
+	    	 
+	    	 for(int ii=-(dimMath); ii<=dimMath;ii++) {
+		    	for(int jj=-(dimMath);jj<=dimMath;jj++) {
+		    		GRoGX[ii+(dimMath)][jj+(dimMath)] /= Nweix;
+		    		
+		    	}
+		     }
+	    	 
+	    	 double[][] GRoGY = new double[dimMat][dimMat];
+	    	 amp=0;
+	    	 for(int ii=-(dimMath); ii<=dimMath;ii++) {
+		    	for(int jj=-(dimMath);jj<=dimMath;jj++) {
+		    		expn = -(Math.pow(ii,2)+Math.pow(jj,2))/signm2;
+		    		amp = -(ii)/(signm2pi*signm2);
+		    		GRoGY[ii+(dimMath)][jj+(dimMath)] = amp*(Math.exp(expn));
+		    		//gauFilterD[ii+(dimMath)][jj+(dimMath)] = 1;
+		    		Nweiy=Nweiy+GRoGY[ii+(dimMath)][jj+(dimMath)];
+		    	}
+		     }
+	    	 
+	    	 for(int ii=-(dimMath); ii<=dimMath;ii++) {
+		    	for(int jj=-(dimMath);jj<=dimMath;jj++) {
+		    		GRoGY[ii+(dimMath)][jj+(dimMath)] /= Nweiy;
+		    		
+		    	}
+		     }
+	    	 
+	    	 //*****************************************************
+	    	 //* LAPLACIAN of GAUSSIAN
+	    	 //*****************************************************
+	    	 
+	    	 double[][] LoG = new double[dimMat][dimMat];
+	    	 amp=0;
+	    	 Nwei=0;
+	    	 for(int ii=-(dimMath); ii<=dimMath;ii++) {
+		    	for(int jj=-(dimMath);jj<=dimMath;jj++) {
+		    		expn = -(Math.pow(ii,2)+Math.pow(jj,2))/signm2;
+		    		amp = (Math.pow(ii,2)+Math.pow(jj,2)-signm2)/(signm2pi*signmq4);
+		    		LoG[ii+(dimMath)][jj+(dimMath)] = amp*(Math.exp(expn));
+		    		//gauFilterD[ii+(dimMath)][jj+(dimMath)] = 1;
+		    		Nwei=Nwei+LoG[ii+(dimMath)][jj+(dimMath)];
+		    	}
+		     }
+	    	 
+	    	 for(int ii=-(dimMath); ii<=dimMath;ii++) {
+		    	for(int jj=-(dimMath);jj<=dimMath;jj++) {
+		    		LoG[ii+(dimMath)][jj+(dimMath)] /= Nwei;
+		    		
 		    	}
 		     }
 	    	 
@@ -210,6 +289,39 @@ public class Snakes extends JPanelControlPointBase{
 	    	 sobelFilter[4][3]=0;
 	    	 sobelFilter[4][4]=0;
 	    	 
+	    	 //******************************
+	    	 //* LAPLACIANO
+	    	 //******************************
+	    	 sobelFilter[0][0]=0;
+	    	 sobelFilter[0][1]=0;
+	    	 sobelFilter[0][2]=0;
+	    	 sobelFilter[0][3]=0;
+	    	 sobelFilter[0][4]=0;
+	    	 
+	    	 sobelFilter[1][0]=0;
+	    	 sobelFilter[1][1]=1;
+	    	 sobelFilter[1][2]=1;
+	    	 sobelFilter[1][3]=1;
+	    	 sobelFilter[1][4]=0;
+	    	 
+	    	 sobelFilter[2][0]=0;
+	    	 sobelFilter[2][1]=1;
+	    	 sobelFilter[2][2]=-8;
+	    	 sobelFilter[2][3]=1;
+	    	 sobelFilter[2][4]=0;
+	    	 
+	    	 sobelFilter[3][0]=0;
+	    	 sobelFilter[3][1]=1;
+	    	 sobelFilter[3][2]=1;
+	    	 sobelFilter[3][3]=1;
+	    	 sobelFilter[3][4]=0;
+	    	 
+	    	 sobelFilter[4][0]=0;
+	    	 sobelFilter[4][1]=0;
+	    	 sobelFilter[4][2]=0;
+	    	 sobelFilter[4][3]=0;
+	    	 sobelFilter[4][4]=0;
+	    	 
 	    	 
 	    	 //float gaufilterdiv = 159*5;
 	    	 float gaufilterdiv = 1;
@@ -228,6 +340,7 @@ public class Snakes extends JPanelControlPointBase{
 	    	 double[][] grad2IY = new double[Hi][Wi];
 	    	 double[][] Eedge = new double[Hi][Wi];
 	    	 double[][] EedgeG = new double[Hi][Wi];
+	    	 double[][] EedgeLoG = new double[Hi][Wi];
 	    	 double[][] EedgeSob = new double[Hi][Wi];
 	    	 double[][] gradEedgeX = new double[Hi][Wi];
 	    	 double[][] gradEedgeY = new double[Hi][Wi];
@@ -330,8 +443,8 @@ public class Snakes extends JPanelControlPointBase{
     				GXt=GYt=0;
     				for(int ii=-2; ii<3;ii++) {
     			    	for(int jj=-2;jj<3;jj++) {
-    			    		GXt = GXt + gauFilter[ii+2][jj+2]*grad2IX[i+ii][j+jj]/gaufilterdiv;
-    			    		GYt = GYt + gauFilter[ii+2][jj+2]*grad2IY[i+ii][j+jj]/gaufilterdiv;
+    			    		GXt = GXt + gauFilter[ii+2][jj+2]*grad2IX[i-ii][j-jj]/gaufilterdiv;
+    			    		GYt = GYt + gauFilter[ii+2][jj+2]*grad2IY[i-ii][j-jj]/gaufilterdiv;
     			    	}
     			    }
     				//GXt = GXt;
@@ -351,13 +464,14 @@ public class Snakes extends JPanelControlPointBase{
 	    	// SOBEL
 	    	//*********************
 	    	double Edgemin=0;
+	    	double EdgeminG=0;
 	    	for(int i=2;(i<(Hi-2));i++){
     			for(int j=2;j<(Wi-2);j++){	
     				GXt=GYt=0;
     				for(int ii=-2; ii<3;ii++) {
     			    	for(int jj=-2;jj<3;jj++) {
     			    		//GXt = GXt + gauFilter[ii+2][jj+2]*sobelFilter[ii+2][jj+2]*ImgBN[i+ii][j+jj];
-    			    		GYt = GYt + sobelFilter[ii+2][jj+2]*ImgBN[i+ii][j+jj];
+    			    		GYt = GYt + sobelFilter[ii+2][jj+2]*ImgBN[i-ii][j-jj];
     			    	}
     			    }
     				//Eedge[i][j]= -GXt*GXt;
@@ -376,8 +490,8 @@ public class Snakes extends JPanelControlPointBase{
 					GXt=GYt=0;
 					for(int ii=-1; ii<2;ii++) {
 				    	for(int jj=-1;jj<2;jj++) {
-				    		GXt = GXt + GX[jj+1][ii+1]*ImgBN[i+ii][j+jj];
-				    		GYt = GYt + GY[jj+1][ii+1]*ImgBN[i+ii][j+jj];
+				    		GXt = GXt + GX[jj+1][ii+1]*ImgBN[i-ii][j-jj];
+				    		GYt = GYt + GY[jj+1][ii+1]*ImgBN[i-ii][j-jj];
 				    		/*GXt = GXt + GX[ii+1][jj+1]*F[i+ii][j+jj];
 				    		GYt = GYt + GY[ii+1][jj+1]*F[i+ii][j+jj];*/
 				    	}
@@ -423,70 +537,111 @@ public class Snakes extends JPanelControlPointBase{
     			    		//GYt = GYt + sobelFilter[ii+2][jj+2]*ImgBN[i+ii][j+jj];
 		    			for(int ii=-(dimMath); ii<=dimMath;ii++) {
 		    		    	for(int jj=-(dimMath);jj<=dimMath;jj++) {
-					    		if(i+ii>=0 && i+ii<Hi && j+jj>=0 && j+jj<Wi) {	    			
-					    			//GXt = GXt + gauFilterD[ii+(int)sigma][jj+(int)sigma]*G[i+ii][j+jj];
-					    			GXt = GXt + gauFilterD[ii+(dimMath)][jj+(dimMath)]*ImgBN[i+ii][j+jj];
+					    		if(i-ii>=0 && i-ii<Hi && j-jj>=0 && j-jj<Wi) {	    			
+					    			//GXt = GXt + gauFilterD[ii+dimMath][jj+dimMath]*G[i+ii][j+jj];
+					    			//GXt = GXt + gauFilterD[ii+(dimMath)][jj+(dimMath)]*ImgBN[i-ii][j-jj];
+					    			//GXt = GXt + gauFilterD[ii+(dimMath)][jj+(dimMath)]*Eedge[i-ii][j-jj];
+					    			GXt = GXt + LoG[ii+(dimMath)][jj+(dimMath)]*ImgBN[i-ii][j-jj];
 					    		}
 					    		else{
-					    			if(i+ii<0)
+					    			if(i-ii<0)
 					    				ind=0;
-					    			if(i+ii>=Hi)
+					    			if(i-ii>=Hi)
 					    				ind=Hi-1;
-					    			if(j+jj<0)
+					    			if(j-jj<0)
 					    				jnd=0;
-					    			if(j+jj>=Wi)
+					    			if(j-jj>=Wi)
 					    				jnd=Wi-1;
-					    			//GXt = GXt + gauFilterD[ii+(int)sigma][jj+(int)sigma]*G[ind][jnd];
-					    			GXt = GXt + gauFilterD[ii+(dimMath)][jj+(dimMath)]*ImgBN[ind][jnd];
+					    			//GXt = GXt + gauFilterD[ii+dimMath][jj+dimMath]*G[ind][jnd];
+					    			//GXt = GXt + gauFilterD[ii+(dimMath)][jj+(dimMath)]*ImgBN[ind][jnd];
+					    			//GXt = GXt + gauFilterD[ii+(dimMath)][jj+(dimMath)]*Eedge[ind][jnd];
+					    			GXt = GXt + LoG[ii+(dimMath)][jj+(dimMath)]*ImgBN[ind][jnd];
 					    		}
 				    		}
     			    		//GXt = GXt + G[i+ii][j+jj]/25;
     			    	}
-		    		G[i][j]=GXt;
+		    		EedgeG[i][j]=-GXt*GXt*wint;
 		    		//EedgeG[i][j]= -GXt*GXt*wint;
     				//Eedge[i][j]= -GYt*GYt; 
-    				//EedgeG[i][j]= -(Math.abs(GXt));
-    				if(EedgeG[i][j]<Edgemin)
-    					Edgemin=EedgeG[i][j];
-<<<<<<< HEAD
+    				EedgeLoG[i][j]= GXt;
+    				if(Math.abs(GXt)>Edgemin)
+    					Edgemin=Math.abs(GXt);
     				
-    				col = (int)Math.round(G[i][j]);
-    				img_color = new Color(col,col,col);
-    				imagetmpGF.setRGB(j, i, img_color.getRGB());
+    				//col = (int)Math.round(GXt);
+    				//img_color = new Color(col,col,col);
+    				//imagetmpGF.setRGB(j, i, img_color.getRGB());
     				
     			}
 	    	}
 	    	
-	    	getOriginFrame().addImage(imagetmpGF, "Gaussian Filter");
 	    	
-=======
-    			    
-    			}
-	    	}
->>>>>>> b699056fc9aa414c13ffa6d023b17955da6c764d
-	    	Edgemin=0;
+	    	
+	    	//Edgemin=0;
+	    	double xg=0,yg=0;
 	    	for(int i=1;i<(Hi-2);i++){
     			for(int j=1;j<(Wi-2);j++){	
     				GXt=GYt=0;
     				GXt=G[i][j]-G[i][j-1];
     				GYt=G[i][j]-G[i-1][j];
-    				EedgeG[i][j]=-(Math.pow(GXt, 2)+Math.pow(GYt, 2));
+    				xg=Math.pow(GXt, 2);
+    				yg=Math.pow(GYt, 2);
+    				//EedgeG[i][j]=-(xg+yg);
 		    		//EedgeG[i][j]= -GXt*GXt*wint;
-    				//Eedge[i][j]= -GYt*GYt; 
+    				//Eedge[i][j]= -GYt*GYt;
+    				//EedgeG[i][j]= -Math.abs(G[i][j]); 
     				//EedgeG[i][j]= -(Math.abs(GXt));
-    				if(EedgeG[i][j]<Edgemin)
-    					Edgemin=EedgeG[i][j];
+    				if(EedgeG[i][j]<EdgeminG)
+    					EdgeminG=EedgeG[i][j];
     			    
+    				if((EedgeLoG[i][j])<0)
+    					col = (int)Math.round(127.5-127.5*Math.abs(EedgeLoG[i][j]/Edgemin));
+    				else
+    					col = (int)Math.round(127.5+127.5*Math.abs(EedgeLoG[i][j]/Edgemin));
+    				//if(col<0)
+    				img_color = new Color(col,col,col);
+    				imagetmpGF.setRGB(j, i, img_color.getRGB());
     			}
 	    	}
 	    	
+	    	getOriginFrame().addImage(imagetmpGF, "LoG Filter");
+	    	//getOriginFrame().addImage(imagetmpGF, "Gaussian Filter");
+	    	
 	    	img_color = new Color(0,0,0);
 	    	
-	    	for(int i=1;(i<(Hi-2));i++){
-    			for(int j=1;j<(Wi-2);j++){	
-    				gradEedgeX[i][j]=EedgeG[i][j]-EedgeG[i][j-1];
-    				gradEedgeY[i][j]=EedgeG[i][j]-EedgeG[i-1][j];  
+	    	//* Gradiente Gaussiano dell'immagine
+	    	double[][] DGImgX = Utility.filter(GAU,gradIX, Hi, Wi, dimMat);
+	    	
+	    	double[][] DGImgY = Utility.filter(GAU,gradIY, Hi, Wi, dimMat);
+	    	
+	    	
+	    	//double[][] DGImg = Utility.filter(GRoG,ImgBN, Hi, Wi, dimMat);
+	    	
+	    	
+	    	for(int i=0;(i<(Hi));i++){
+				for(int j=0;j<(Wi);j++){
+					G[i][j] = 1/(1+Math.sqrt(Math.pow(DGImgX[i][j],2))+Math.pow(DGImgY[i][j],2));
+				}
+			}
+	    	
+	    	BufferedImage imagetmpG = new BufferedImage(Wi, Hi, BufferedImage.TYPE_INT_RGB);
+	    	for(int i=0;(i<(Hi));i++){
+				for(int j=0;j<(Wi);j++){
+					col = (int)Math.round(255*(G[i][j]));
     				
+    				//if(col<0)
+    				img_color = new Color(col,col,col);
+    				imagetmpG.setRGB(j, i, img_color.getRGB());
+				}
+	    	}
+	    	getOriginFrame().addImage(imagetmpG, "Energy");
+	    	
+	    	for(int i=1;(i<(Hi));i++){
+    			for(int j=1;j<(Wi);j++){	
+    				//gradEedgeX[i][j]=(EedgeG[i][j+1]-EedgeG[i][j-1])/2;
+    				//gradEedgeY[i][j]=(EedgeG[i+1][j]-EedgeG[i-1][j])/2;  
+    				
+    				gradEedgeX[i][j]=(DGImgX[i][j]-DGImgX[i][j-1]);
+    				gradEedgeY[i][j]=(DGImgY[i][j]-DGImgY[i-1][j]);  
     				
     				/*if(gradEedgeX[i][j]>255) {
     					//Eedge[i][j]=255;
@@ -504,8 +659,8 @@ public class Snakes extends JPanelControlPointBase{
     					img_color = new Color(255,0,0);
     					
     				}else*/ if(EedgeG[i][j]<0) {
-    					//img_color = new Color((int)Math.round(255*EedgeG[i][j]/Edgemin),0,0);
-    					img_color = new Color(255,0,0);
+    					img_color = new Color((int)Math.round(255*EedgeG[i][j]/EdgeminG),0,0);
+    					//img_color = new Color(255,0,0);
     				}
     				
     				
@@ -513,44 +668,41 @@ public class Snakes extends JPanelControlPointBase{
     				img_color = new Color(0,0,0);
     			}
 	    	}
-	    	getOriginFrame().addImage(imagetmp, "Gradiente Energia");
+	    	getOriginFrame().addImage(imagetmp, "Energia LoG");
 	    	
 	    	
 	    	
-	    	
-	    	snakePoints = new ArrayList<Point2D>();
-	    	int step=0,numInter=10;
-	    	FourPointInt ctrlPoint0=null;
-	    	double hx=0,hy=0;
-	    	ArrayList<FourPointInt> listCtrlPoin = getControlPoint();
-	    	for(FourPointInt ctrlPoint : listCtrlPoin) {
-	    		
-	    		if(step>0) {
-	    			hx=(double)1.0*(ctrlPoint.getX()-ctrlPoint0.getX())/numInter;
-	    			hy=(double)1.0*(ctrlPoint.getY()-ctrlPoint0.getY())/numInter;
-	    			for(int k=1;k<=numInter;k++) {
-	    				Point2D pointSnake = new Point2D.Double(ctrlPoint0.getX()+k*hx,ctrlPoint0.getY()+k*hy);
-	    				snakePoints.add(pointSnake);
-	    			}
-	    		}
-	    		else {
-	    			Point2D pointSnake = new Point2D.Double(ctrlPoint.getX(),ctrlPoint.getY());
-	    			snakePoints.add(pointSnake);
-	    		}
-	    		step++;
-	    		ctrlPoint0=ctrlPoint;
+	    	if(snakePoints==null) {
+		    	snakePoints = new ArrayList<Point2D>();
+		    	int step=0,numInter=10;
+		    	FourPointInt ctrlPoint0=null;
+		    	double hx=0,hy=0;
+		    	ArrayList<FourPointInt> listCtrlPoin = getControlPoint();
+		    	for(FourPointInt ctrlPoint : listCtrlPoin) {
+		    		
+		    		if(step>0) {
+		    			hx=(double)1.0*(ctrlPoint.getX()-ctrlPoint0.getX())/numInter;
+		    			hy=(double)1.0*(ctrlPoint.getY()-ctrlPoint0.getY())/numInter;
+		    			for(int k=1;k<=numInter;k++) {
+		    				Point2D pointSnake = new Point2D.Double(ctrlPoint0.getX()+k*hx,ctrlPoint0.getY()+k*hy);
+		    				snakePoints.add(pointSnake);
+		    			}
+		    		}
+		    		else {
+		    			Point2D pointSnake = new Point2D.Double(ctrlPoint.getX(),ctrlPoint.getY());
+		    			snakePoints.add(pointSnake);
+		    		}
+		    		step++;
+		    		ctrlPoint0=ctrlPoint;
+		    	}
 	    	}
-	    	
 	    	ArrayList<Point2D> snakePointsTmp = new ArrayList<Point2D>();
-<<<<<<< HEAD
-	    	int x,y,stepSnakes=20,intStep=0,snakeSize=snakePoints.size();
-=======
-	    	int x,y,stepSnakes=1,intStep=0,snakeSize=snakePoints.size();
->>>>>>> b699056fc9aa414c13ffa6d023b17955da6c764d
-	    	double gamm=1,alp=1,bet=1,xs1,ys1;
+	    	int x,y,stepSnakes=10,intStep=0,snakeSize=snakePoints.size();
+	    	double gamm=16,alp=2,bet=1,xs1,ys1;
 	    	double E,Emin,percMov=0;
 	    	int xxmin=0,yymin=0,numMod=0;
 	    	Point2D ps1,ps_1,ps2,ps_2;
+	    	double ForceDx=0,ForceDy=0;
 	    	int snakeDim = snakePoints.size();
 	    	double minDeltaX=0,minDeltaY=0;
 	    	double[][] A = new double[snakeDim][snakeDim];
@@ -611,13 +763,17 @@ public class Snakes extends JPanelControlPointBase{
 		    		y=(int)Math.round(ps.getY());
 	    			Bx[is]=ps.getX()*gamm + gradEedgeX[y][x];
 	    			By[is]=ps.getY()*gamm + gradEedgeY[y][x];
-<<<<<<< HEAD
+		    		/*ForceDx=0;
+		    		ForceDy=0;
+		    		if(is==15) {
+		    			ForceDx=-2*(ps.getX()-Wi/2);
+		    			ForceDy=-2*(ps.getY()-Hi/2);
+		    		}
+		    		
+		    		Bx[is]=ps.getX() + ForceDx;
+	    			By[is]=ps.getY() + ForceDy;*/
 	    			//Atmp=Utility.shift_array(Arow, is-2);
 	    			//for(int js=0;js<snakeDim;js++) {
-=======
-	    			Atmp=Utility.shift_array(Arow, is-2);
-	    			for(int js=0;js<snakeDim;js++) {
->>>>>>> b699056fc9aa414c13ffa6d023b17955da6c764d
     					/*if(is-js-2==0)
     						A[is][js]=bet;
     					else if(is-js-1==0)

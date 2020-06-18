@@ -144,7 +144,7 @@ public class Snakes extends JPanelControlPointBase{
 	    	 double Nwei=0;
 	    	 double wint=1;
 	    	 //double sigma=0.84089642;
-	    	 double sigma=4;
+	    	 double sigma=2;
 	    	 double expn=0;
 	    	 double signmq = sigma*sigma;
 	    	 double signmq4 = signmq*signmq;
@@ -253,9 +253,9 @@ public class Snakes extends JPanelControlPointBase{
 	    	 for(int ii=-(dimMath); ii<=dimMath;ii++) {
 		    	for(int jj=-(dimMath);jj<=dimMath;jj++) {
 		    		LoG[ii+(dimMath)][jj+(dimMath)] /= Nwei;
-		    		
 		    	}
 		     }
+	    	 
 	    	 
 	    	 
 	    	 double[][] sobelFilter = new double[5][5];
@@ -608,6 +608,7 @@ public class Snakes extends JPanelControlPointBase{
 	    	
 	    	img_color = new Color(0,0,0);
 	    	
+
 	    	//* Gradiente Gaussiano dell'immagine
 	    	double[][] DGImgX = Utility.filter(GAU,gradIX, Hi, Wi, dimMat);
 	    	
@@ -635,8 +636,9 @@ public class Snakes extends JPanelControlPointBase{
 	    	}
 	    	getOriginFrame().addImage(imagetmpG, "Energy");
 	    	
-	    	for(int i=1;(i<(Hi));i++){
-    			for(int j=1;j<(Wi);j++){	
+	    	
+	    	for(int i=1;(i<(Hi-2));i++){
+    			for(int j=1;j<(Wi-2);j++){	
     				//gradEedgeX[i][j]=(EedgeG[i][j+1]-EedgeG[i][j-1])/2;
     				//gradEedgeY[i][j]=(EedgeG[i+1][j]-EedgeG[i-1][j])/2;  
     				
@@ -669,6 +671,7 @@ public class Snakes extends JPanelControlPointBase{
     			}
 	    	}
 	    	getOriginFrame().addImage(imagetmp, "Energia LoG");
+
 	    	
 	    	
 	    	
@@ -698,7 +701,7 @@ public class Snakes extends JPanelControlPointBase{
 	    	}
 	    	ArrayList<Point2D> snakePointsTmp = new ArrayList<Point2D>();
 	    	int x,y,stepSnakes=10,intStep=0,snakeSize=snakePoints.size();
-	    	double gamm=16,alp=2,bet=1,xs1,ys1;
+	    	double gamm=1,alp=1,bet=1,xs1,ys1;
 	    	double E,Emin,percMov=0;
 	    	int xxmin=0,yymin=0,numMod=0;
 	    	Point2D ps1,ps_1,ps2,ps_2;

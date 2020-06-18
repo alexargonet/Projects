@@ -646,4 +646,73 @@ public class Utility {
     	}
     	return G;
 	}
+	
+	//***********************************************************
+	//*  GADIENTE X of GAUSSIAN
+	//***********************************************************
+	public static double[][] gradGauX(int sigma){
+		double expn=0;
+	   	 double signmq = sigma*sigma;
+	   	 double signmq4 = signmq*signmq;
+	   	 double signm2 = signmq*2;
+	   	 double signm2pi = signm2*Math.PI;
+	   	 int dimMat=(int)Math.ceil(6*sigma);
+	   	 if(dimMat%2==0)
+	   		 dimMat++;
+	   	 int dimMath=(int)Math.ceil(dimMat/2);
+		 double[][] GRoGX = new double[dimMat][dimMat];
+	   	 double amp=0;
+	   	 double Nweix=0;
+	   	 for(int ii=-(dimMath); ii<=dimMath;ii++) {
+	    	for(int jj=-(dimMath);jj<=dimMath;jj++) {
+	    		expn = -(Math.pow(ii,2)+Math.pow(jj,2))/signm2;
+	    		amp = -(2*jj)/(signm2pi*signm2);
+	    		GRoGX[ii+(dimMath)][jj+(dimMath)] = amp*(Math.exp(expn));
+	    		//gauFilterD[ii+(dimMath)][jj+(dimMath)] = 1;
+	    		if(jj<0)
+	    			Nweix=Nweix+GRoGX[ii+(dimMath)][jj+(dimMath)];
+	    	}
+	     }
+	   	for(int ii=-(dimMath); ii<=dimMath;ii++) {
+	    	for(int jj=-(dimMath);jj<=dimMath;jj++) {
+	    		GRoGX[ii+(dimMath)][jj+(dimMath)] /= Nweix;
+	    		
+	    	}
+	     }
+	   	 return GRoGX;
+	}
+	//***********************************************************
+	//*  GADIENTE Y of GAUSSIAN
+	//***********************************************************
+	public static double[][] gradGauY(int sigma){
+		double expn=0;
+	   	 double signmq = sigma*sigma;
+	   	 double signmq4 = signmq*signmq;
+	   	 double signm2 = signmq*2;
+	   	 double signm2pi = signm2*Math.PI;
+	   	 int dimMat=(int)Math.ceil(6*sigma);
+	   	 if(dimMat%2==0)
+	   		 dimMat++;
+	   	 int dimMath=(int)Math.ceil(dimMat/2);
+	   	 double[][] GRoGY = new double[dimMat][dimMat];
+	   	 double amp=0;
+	   	 double Nweiy=0;
+	   	 for(int ii=-(dimMath); ii<=dimMath;ii++) {
+	    	for(int jj=-(dimMath);jj<=dimMath;jj++) {
+	    		expn = -(Math.pow(ii,2)+Math.pow(jj,2))/signm2;
+	    		amp = -(2*ii)/(signm2pi*signm2);
+	    		GRoGY[ii+(dimMath)][jj+(dimMath)] = amp*(Math.exp(expn));
+	    		//gauFilterD[ii+(dimMath)][jj+(dimMath)] = 1;
+	    		if(ii<0)
+	    			Nweiy=Nweiy+GRoGY[ii+(dimMath)][jj+(dimMath)];
+	    	}
+	     }
+	   	for(int ii=-(dimMath); ii<=dimMath;ii++) {
+	    	for(int jj=-(dimMath);jj<=dimMath;jj++) {
+	    		GRoGY[ii+(dimMath)][jj+(dimMath)] /= Nweiy;
+	    		
+	    	}
+	     }
+	   	 return GRoGY;
+	}
 }

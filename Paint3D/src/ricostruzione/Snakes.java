@@ -664,8 +664,10 @@ public class Snakes extends JPanelControlPointBase{
 	    	double[][] GRoGX1 = Utility.gradGauX(1);
 	    	double[][] GRoGY1 = Utility.gradGauY(1);
 	    	
+
 	    	double[][] gradGx = Utility.filter(GRoGX1,G, Hi, Wi, 7);
 	    	double[][] gradGY = Utility.filter(GRoGY1,G, Hi, Wi, 7);
+
 	    	
 	    	for(int i=1;(i<(Hi-2));i++){
     			for(int j=1;j<(Wi-2);j++){	
@@ -736,8 +738,10 @@ public class Snakes extends JPanelControlPointBase{
 		    	}
 	    	}
 	    	ArrayList<Point2D> snakePointsTmp = new ArrayList<Point2D>();
+
 	    	int x,y,stepSnakes=30,intStep=0,snakeSize=snakePoints.size();
 	    	double gamm=0.1,alp=0.1,bet=0.01,xs1,ys1;
+
 	    	double E,Emin,percMov=0;
 	    	int xxmin=0,yymin=0,numMod=0;
 	    	Point2D ps1,ps_1,ps2,ps_2;
@@ -800,6 +804,7 @@ public class Snakes extends JPanelControlPointBase{
 	    			Point2D ps = snakePoints.get(is);
 	    			x=(int)Math.round(ps.getX());
 		    		y=(int)Math.round(ps.getY());
+
 		    		if(x>Wi)
 		    			x=Wi-1;
 		    		if(y>Hi)
@@ -808,6 +813,7 @@ public class Snakes extends JPanelControlPointBase{
 		    			x=0;
 		    		if(y<0)
 		    			y=0;
+
 	    			Bx[is]=ps.getX()*gamm + gradEedgeX[y][x];
 	    			By[is]=ps.getY()*gamm + gradEedgeY[y][x];
 		    		/*ForceDx=0;

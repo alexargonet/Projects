@@ -2,6 +2,7 @@ package utility;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.Hashtable;
 import java.util.LinkedHashMap;
 
 import org.apache.commons.math3.linear.*;
@@ -9,6 +10,7 @@ import org.apache.commons.math3.linear.*;
 import objectBase.ObjectBase;
 import paintimage.PointResEqua;
 //import sun.security.util.ArrayUtil;
+import ricostruzione.BicubicFunct;
 
 public class Utility {
 	public static final double EPS= 1E-5;
@@ -714,5 +716,76 @@ public class Utility {
 	    	}
 	     }
 	   	 return GRoGY;
+	}
+	//****************************************************************************
+	//** INTERPOLAZIONE BICUBICA - x,y parte decimale delle varibili da calcolare
+	//****************************************************************************
+	public static double BSpline2D(double[][] Pin,Hashtable<Integer, BicubicFunct> Bfunct_map,double Hi,double Wi,double x,double y) {
+		double Wkl=0;
+		double Bk=0;
+		double Bl=0;
+		double FunctTot=0;
+		for(int k=0;k<=3;k++){
+			for(int l=0;l<=3;l++){
+				Bk = Bfunct_map.get(k).value(x);
+				Bl = Bfunct_map.get(l).value(y);
+				Wkl=Bk*Bl;
+				FunctTot = FunctTot + Wkl*Pin[k][l];
+			}
+		}
+		return FunctTot;
+	}
+	
+	//****************************************************************************
+	//** DERIVATA INTERPOLAZIONE BICUBICA - x,y parte decimale delle varibili da calcolare
+	//****************************************************************************
+	public static double[] gradBSpline2D(double[][] Pin,Hashtable<Integer, BicubicFunct> Bfunct_map,double Hi,double Wi,double y,double x) {
+		double Wklx=0,Wkly=0;
+		double Bk=0,Bkder1=0;
+		double Bl=0,Blder1=0;
+		double FunctTot[] = new double[2];
+		FunctTot[0]= 0;
+		FunctTot[1]= 0;
+		for(int k=0;k<=3;k++){
+			for(int l=0;l<=3;l++){
+				Bk = Bfunct_map.get(k).value(y);
+				Bl = Bfunct_map.get(l).value(x);
+				Bkder1 = Bfunct_map.get(k).der1val(y);
+				Blder1 = Bfunct_map.get(l).der1val(x);
+				Wklx=Bk*Blder1;
+				Wkly=Bkder1*Bl;
+				FunctTot[0] = FunctTot[0] + Wklx*Pin[k][l];
+				FunctTot[1] = FunctTot[1] + Wkly*Pin[k][l];
+			}
+		}
+		return FunctTot;
+	}
+	
+	//*******************************************************
+	//* GET LOCAL MATRIX - crea la matrice degli intorni
+	//*******************************************************
+	public static void getLocalMatrix(double[][] Min,double[][] Mout,int Hi,int Wi,int y,int x) {
+		int dim = Mout.length;
+		int offset = dim/2-1;
+		int xout=0,yout=0;
+		for(int i=0;i<dim;i++) {
+			for(int j=0;j<dim;j++) {
+				if(y-offset+i<0)
+					yout=0;
+				else if(y-offset+i>Hi-1)
+					yout=Hi-1;
+				else 
+					yout=y-offset+i;
+
+				if(x-offset+j<0)
+					xout=0;
+				else if(x-offset+j>Wi-1)
+					xout=Wi-1;
+				else
+					xout=x-offset+j;
+				
+					Mout[i][j]=Min[yout][xout];
+			}
+		}
 	}
 }

@@ -10,7 +10,9 @@ import java.awt.event.MouseEvent;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
+import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Hashtable;
 
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
@@ -30,6 +32,8 @@ public class Snakes extends JPanelControlPointBase{
 	ImageU imgInfo=null;
 	ArrayList<Point2D> snakePoints=null;
 	private static final Color LINE_COLOR_2 = Color.green;
+	Hashtable<Integer, BicubicFunct> Bfunct_map=null;
+		
 
 	public Snakes(ImageU img, PaintImage originFrame) {
 		super(img, originFrame);
@@ -71,6 +75,11 @@ public class Snakes extends JPanelControlPointBase{
         popupMenu.add(resetSnakeMenuItem);
         //popupMenu.add(morph2MenuItem);
         //popupMenu.add(spline3MenuItem);
+        Bfunct_map = new Hashtable<Integer, BicubicFunct>();
+        Bfunct_map.put(0, new B0());
+    	Bfunct_map.put(1, new B1());
+    	Bfunct_map.put(2, new B2());
+    	Bfunct_map.put(3, new B3());
 	}
 	
 	@Override
@@ -118,9 +127,12 @@ public class Snakes extends JPanelControlPointBase{
 	    //* 25 mag 2020-16:50:40-		startSnake             *//	   
 	    //******************************************************//
 	    public void startSnake() {
+	    	
 	    	BufferedImage imgBuf = imgInfo.getImgBuf();
 	    	int imageType=1;
-	    	 double[][] gauFilter = new double[5][5];
+	    	double[][] gauFilter = new double[5][5];
+	    	double[][] LocalMatrix = new double[4][4];
+	    	
 	    	 
 	    	 
 	    	 
@@ -357,6 +369,7 @@ public class Snakes extends JPanelControlPointBase{
 	    	 double[][] EedgeSob = new double[Hi][Wi];
 	    	 double[][] gradEedgeX = new double[Hi][Wi];
 	    	 double[][] gradEedgeY = new double[Hi][Wi];
+	    	 double[][] Potential = new double[Hi][Wi];
 	    	 
 	    	 double[][] GX = new double[3][3];
 	    	 double[][] GY = new double[3][3];
@@ -626,27 +639,35 @@ public class Snakes extends JPanelControlPointBase{
 	    	double[][] GRoGX2 = Utility.gradGauX(2);
 	    	double[][] GRoGY2 = Utility.gradGauY(2);
 	    	//double[][] DGImgX = Utility.filter(GAU,gradIX, Hi, Wi, dimMat);
-	    	double[][] DGImgX = Utility.filter(GRoGX2,ImgBN, Hi, Wi, dimMat);
+	    	double[][] DGImgX = Utility.filter(GRoGX2,ImgBN, Hi, Wi, GRoGX2.length);
 	    	
 	    	//double[][] DGImgY = Utility.filter(GAU,gradIY, Hi, Wi, dimMat);
-	    	double[][] DGImgY = Utility.filter(GRoGY2,ImgBN, Hi, Wi, dimMat);
+	    	double[][] DGImgY = Utility.filter(GRoGY2,ImgBN, Hi, Wi, GRoGY2.length);
 	    	
 	    	
 	    	//double[][] DGImg = Utility.filter(GRoG,ImgBN, Hi, Wi, dimMat);
 	    	
 	    	double grad=0;
 	    	int nOrder=1;
+	    	double[] gradientImg;
 	    	for(int i=0;(i<(Hi));i++){
 				for(int j=0;j<(Wi);j++){
 					//G[i][j] = -10/(1+(Math.pow(DGImgX[i][j],2)+Math.pow(DGImgY[i][j],2)));
 					//G[i][j] = 0.1*(Math.pow(DGImgX[i][j],2)+Math.pow(DGImgY[i][j],2));
 					grad=Math.sqrt(Math.pow(DGImgX[i][j],2)+Math.pow(DGImgY[i][j],2));
 					grad=Math.pow(grad, nOrder);
-					G[i][j] = grad/(Math.pow(10, nOrder+2)+grad);
+					G[i][j] = grad/(Math.pow(10, nOrder+1)+grad);
 					//G[i][j] = ((Math.pow(DGImgX[i][j],2)+Math.pow(DGImgY[i][j],2)))/(1000+((Math.pow(DGImgX[i][j],2)+Math.pow(DGImgY[i][j],2))));
+					//Utility.getLocalMatrix(ImgBN,LocalMatrix,Hi,Wi,i,j);
+					//gradientImg=Utility.gradBSpline2D(LocalMatrix, Bfunct_map, Hi, Wi, 0, 0);
+					//Potential[i][j]=-(Math.pow(gradientImg[0],2)+Math.pow(gradientImg[1],2));
+					Potential[i][j]=-0.00008*(Math.pow(DGImgX[i][j],2)+Math.pow(DGImgY[i][j],2));
+					//if(Math.abs(Potential[i][j])>1000000)
+						//i=i;
 				}
 			}
 	    	double Gmax=0;
+	    	double Pmax=0;
 	    	BufferedImage imagetmpG = new BufferedImage(Wi, Hi, BufferedImage.TYPE_INT_RGB);
 	    	for(int i=0;(i<(Hi));i++){
 				for(int j=0;j<(Wi);j++){
@@ -654,6 +675,10 @@ public class Snakes extends JPanelControlPointBase{
     				
 					if(Math.abs(G[i][j])>Gmax) {
 						Gmax=Math.abs(G[i][j]);
+					}
+					
+					if(Math.abs(Potential[i][j])>Pmax) {
+						Pmax=Math.abs(Potential[i][j]);
 					}
     				//if(col<0)
     				//img_color = new Color(col,col,col);
@@ -665,9 +690,10 @@ public class Snakes extends JPanelControlPointBase{
 	    	double[][] GRoGY1 = Utility.gradGauY(1);
 	    	
 
-	    	double[][] gradGx = Utility.filter(GRoGX1,G, Hi, Wi, 7);
-	    	double[][] gradGY = Utility.filter(GRoGY1,G, Hi, Wi, 7);
-
+	    	double[][] gradGx = Utility.filter(GRoGX1,G, Hi, Wi, GRoGX1.length);
+	    	double[][] gradGY = Utility.filter(GRoGY1,G, Hi, Wi, GRoGY1.length);
+	    	
+	    	double[] gradientPot1;
 	    	
 	    	for(int i=1;(i<(Hi-2));i++){
     			for(int j=1;j<(Wi-2);j++){	
@@ -682,6 +708,8 @@ public class Snakes extends JPanelControlPointBase{
     				
     				gradEedgeX[i][j]=gradGx[i][j];
     				gradEedgeY[i][j]=gradGY[i][j];  
+    				
+    				
     				
     				/*if(gradEedgeX[i][j]>255) {
     					//Eedge[i][j]=255;
@@ -700,6 +728,7 @@ public class Snakes extends JPanelControlPointBase{
     					
     				}else*/ //if(G[i][j]>0) {
     					img_color = new Color((int)Math.round(255*Math.abs(G[i][j])/Gmax),0,0);
+    					//img_color = new Color((int)Math.round(255*Math.abs(Potential[i][j])/Pmax),0,0);
     					//img_color = new Color(255,0,0);
     				//}
     				
@@ -738,10 +767,11 @@ public class Snakes extends JPanelControlPointBase{
 		    	}
 	    	}
 	    	ArrayList<Point2D> snakePointsTmp = new ArrayList<Point2D>();
-
+	    	double[] gradientPot = new double[2];
 	    	int x,y,stepSnakes=30,intStep=0,snakeSize=snakePoints.size();
 	    	double gamm=0.1,alp=0.1,bet=0.01,xs1,ys1;
-
+	    	//double gamm=1,alp=1,bet=1,xs1,ys1;
+	    	double xdec=0,ydec=0,xgrad=0,ygrad=0;
 	    	double E,Emin,percMov=0;
 	    	int xxmin=0,yymin=0,numMod=0;
 	    	Point2D ps1,ps_1,ps2,ps_2;
@@ -813,9 +843,32 @@ public class Snakes extends JPanelControlPointBase{
 		    			x=0;
 		    		if(y<0)
 		    			y=0;
-
+		    		
+		    		xdec= BigDecimal.valueOf(ps.getX()).divideAndRemainder(BigDecimal.ONE)[1].floatValue();
+		    		ydec= BigDecimal.valueOf(ps.getY()).divideAndRemainder(BigDecimal.ONE)[1].floatValue();
+		    		
+		    		Utility.getLocalMatrix(Potential,LocalMatrix,Hi,Wi,y,x);
+					gradientPot=Utility.gradBSpline2D(LocalMatrix, Bfunct_map, Hi, Wi, ydec, xdec);
+					
+	    			Bx[is]=ps.getX()*gamm - gradientPot[0];
+	    			By[is]=ps.getY()*gamm - gradientPot[1];
+	    			
+	    			
+	    			Utility.getLocalMatrix(gradEedgeX,LocalMatrix,Hi,Wi,y,x);
+					//gradientPot1=Utility.gradBSpline2D(LocalMatrix, Bfunct_map, Hi, Wi, ydec, xdec);
+					xgrad=Utility.BSpline2D(LocalMatrix, Bfunct_map, Hi, Wi, ydec, xdec);
+					
+					Utility.getLocalMatrix(gradEedgeY,LocalMatrix,Hi,Wi,y,x);
+					//gradientPot1=Utility.gradBSpline2D(LocalMatrix, Bfunct_map, Hi, Wi, ydec, xdec);
+					ygrad=Utility.BSpline2D(LocalMatrix, Bfunct_map, Hi, Wi, ydec, xdec);
+					//gradEedgeX[y][x]=2*gradientPot1[0];
+    				//gradEedgeY[y][x]=2*gradientPot1[1];  
+	    			
 	    			Bx[is]=ps.getX()*gamm + gradEedgeX[y][x];
 	    			By[is]=ps.getY()*gamm + gradEedgeY[y][x];
+	    			
+	    			//Bx[is]=ps.getX()*gamm + xgrad;
+	    			//By[is]=ps.getY()*gamm + ygrad;
 		    		/*ForceDx=0;
 		    		ForceDy=0;
 		    		if(is==15) {
@@ -991,5 +1044,7 @@ public class Snakes extends JPanelControlPointBase{
 			
 		g2.setStroke(initStroke);
     }
+	
+	
 
 }

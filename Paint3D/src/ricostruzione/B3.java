@@ -9,5 +9,12 @@ public class B3 implements BicubicFunct {
 		
 		return res;
 	}
+	
+	public double der1val(double t) {
+		double res=0;
+		res= (t*t)/2;
+		
+		return res;
+	}
 
 }
